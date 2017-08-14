@@ -41,7 +41,7 @@ function next() {
         }
     }
     else {
-        answerNotChosen();
+        setInfoMessage("Choose answer!");
     }
 }
 
@@ -50,7 +50,7 @@ function back() {
             previousQuestion();
         }
         else{
-            noMorePreviousQuestions();
+            setInfoMessage("This is first question!");
         }
 }
 
@@ -75,7 +75,7 @@ function setAnswers(id) {
 function isAnyChecked (){
     for (var i = 0; i < radioButtons.length; i++){
         if(radioButtons[i].checked){
-            finishContainer.innerHTML = "";
+            setInfoMessage("");
             return true;
         }
     }
@@ -98,21 +98,21 @@ function login(){
     if(loginNotEmpty()) {
         if (newUser()) {
             setLocalStorage();
-            loggedInFirstTimeGreeting();
+            setInfoMessage("Hello first time " + localStorage.getItem("userName"))
             showData();
             setCookie();
         }
         else if (registeredUser()) {
-            loggedInAgainGreeting();
+            setInfoMessage("Hello again " + localStorage.getItem("userName"));
             showData();
             setCookie();
         }
         else {
-            userNotFound();
+            setInfoMessage("User not found / Wrong user name or password")
         }
     }
     else {
-        loginFieldsEmpty();
+        setInfoMessage("No data");
     }
 }
 
@@ -133,10 +133,10 @@ function getCookie(cookieName) {
 
 function checkCookie() {
     if (getCookie("username") !== ""){
-        finishContainer.innerHTML = ("Welcome " + getCookie("username"));
+        setInfoMessage("Welcome " + getCookie("username"));
     }
     else {
-        finishContainer.innerHTML = ("Welcome, new user!");
+        setInfoMessage("Welcome, new user!");
     }
 }
 
@@ -163,16 +163,12 @@ function nextQuestion() {
 }
 
 function quizFinish() {
-    finishContainer.innerHTML = ("You answered " + correctAnswers + " questions correctly!");
+    setInfoMessage("You answered " + correctAnswers + " questions correctly!");
     quizContainer.remove();
 }
 
 function notLastQuestion() {
     return currentQuestion !== (allQuestions.length - 1);
-}
-
-function answerNotChosen() {
-    finishContainer.innerHTML = "Choose answer!";
 }
 
 function notFirstQuestion() {
@@ -182,10 +178,6 @@ function notFirstQuestion() {
 function previousQuestion() {
     currentQuestion--;
     setQuestion(currentQuestion);
-}
-
-function noMorePreviousQuestions() {
-    finishContainer.innerHTML = "This is first question!";
 }
 
 function loginNotEmpty() {
@@ -205,22 +197,10 @@ function setCookie() {
     document.cookie = "username=" + userNameContainer.value;
 }
 
-function loggedInFirstTimeGreeting() {
-    finishContainer.innerHTML = ("Hello first time " + localStorage.getItem("userName"));
-}
-
-function loggedInAgainGreeting() {
-    finishContainer.innerHTML = ("Hello again " + localStorage.getItem("userName"));
-}
-
-function userNotFound() {
-    finishContainer.innerHTML = ("User not found / Wrong user name or password");
-}
-
-function loginFieldsEmpty() {
-    finishContainer.innerHTML = ("No data");
-}
-
 function registeredUser() {
     return localStorage.getItem("userName") === userNameContainer.value && localStorage.getItem("password") === passwordContainer.value;
+}
+
+function setInfoMessage(message){
+    finishContainer.innerHTML = message;
 }
