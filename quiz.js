@@ -37,7 +37,7 @@ function next() {
             nextQuestion();
         }
         else{
-            quizFinish();
+            quizFinish("You answered " + correctAnswers + " questions correctly!");
         }
     }
     else {
@@ -162,8 +162,8 @@ function nextQuestion() {
     setQuestion(currentQuestion);
 }
 
-function quizFinish() {
-    setInfoMessage("You answered " + correctAnswers + " questions correctly!");
+function quizFinish(message) {
+    setInfoMessage(message);
     quizContainer.remove();
 }
 
