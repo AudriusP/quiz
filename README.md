@@ -1,2 +1,2 @@
 # quiz
-Simple Quiz with JS
+Simple quiz with JS
