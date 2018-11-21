@@ -4,25 +4,10 @@
     <meta charset="UTF-8">
     <title>Quiz</title>
 </head>
-<body onload="checkCookie()">
-<div id="login">
-    User name:<br>
-    <input id="userName"><br>
-    Password:<br>
-    <input type="password" id="password"><br><br>
-    <button onclick="login()">Login</button>
-</div>
-<div id="quiz" style="display: none">
-    <p id="questionContainer"></p>
-    <p><input name="answer" type="radio" id="firstChoice"><span id="firstChoiceContainer"></span></p>
-    <p><input name="answer" type="radio" id="secondChoice"><span id="secondChoiceContainer"></span></p>
-    <p><input name="answer" type="radio" id="thirdChoice"><span id="thirdChoiceContainer"></span></p>
-    <p><input name="answer" type="radio" id="fourthChoice"><span id="fourthChoiceContainer"></span></p>
-    <button onclick="back()">Previous question</button>
-    <button onclick="next()">Next question</button>
-</div>
-<p id="finish"></p>
+<body>
+<div id="app"></div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="quiz.js"></script>
+<script src="js/quiz.js"></script>
+<script>Quiz.run('app');</script>
 </body>
 </html>
