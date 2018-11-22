@@ -1,26 +1,48 @@
-var allQuestions = [];
-var radioButtons = [];
-var choicesContainers = [];
-
 const Quiz = function () {
+  var questions = [];
+  var correctAnswers = 0;
+
   function run(enterElementId) {
     UI.construct(document.getElementById(enterElementId));
 
     $.getJSON("./data/data.json", function (json) {
-      allQuestions = json.allQuestions;
+      questions = json.questions;
       Question.set(0);
     });
   }
 
+  function getQuestionById(id) {
+    return questions[id];
+  }
+
+  function getQuestionsSize() {
+    return questions.length;
+  }
+
+  function increaseCorrectAnswers() {
+    correctAnswers++;
+  }
+
+  function finish() {
+    UI.getQuizContainer().remove();
+    UI.setInfoMessage("You answered " + correctAnswers + " questions correctly!");
+  }
+
   return {
-    run: run
+    run: run,
+    getQuestionById: getQuestionById,
+    getQuestionsSize: getQuestionsSize,
+    increaseCorrectAnswers: increaseCorrectAnswers,
+    finish: finish
   }
 }();
 
 const UI = function () {
   var questionContainer;
   var quizContainer;
-  var finishContainer;
+  var infoContainer;
+  var radioButtons = [];
+  var choicesContainers = [];
 
   function construct(enterElement) {
     quizContainer = document.createElement('div');
@@ -60,11 +82,15 @@ const UI = function () {
     nextButton.appendChild(document.createTextNode("Next question"));
     quizContainer.appendChild(nextButton);
 
-    finishContainer = document.createElement('p');
-    finishContainer.setAttribute('id', 'finish');
+    infoContainer = document.createElement('p');
+    infoContainer.setAttribute('id', 'finish');
 
     enterElement.appendChild(quizContainer);
-    enterElement.appendChild(finishContainer)
+    enterElement.appendChild(infoContainer)
+  }
+
+  function setInfoMessage(message) {
+    infoContainer.innerHTML = message;
   }
 
   function getQuestionContainer() {
@@ -75,20 +101,35 @@ const UI = function () {
     return quizContainer;
   }
 
-  function getFinishContainer() {
-    return finishContainer;
+  function getChoicesContainerById(id) {
+    return choicesContainers[id];
+  }
+
+  function getChoicesContainersSize() {
+    return choicesContainers.length;
+  }
+
+  function getRadioButtonrById(id) {
+    return radioButtons[id];
+  }
+
+  function getRadioButtonsSize() {
+    return radioButtons.length;
   }
 
   return {
     construct: construct,
     getQuestionContainer: getQuestionContainer,
     getQuizContainer: getQuizContainer,
-    getFinishContainer: getFinishContainer
+    getChoicesContainerById: getChoicesContainerById,
+    getChoicesContainersSize: getChoicesContainersSize,
+    getRadioButtonrById: getRadioButtonrById,
+    getRadioButtonsSize: getRadioButtonsSize,
+    setInfoMessage: setInfoMessage
   }
 }();
 
 const Question = function () {
-  var correctAnswers = 0;
   var currentQuestion = 0;
 
   function next() {
@@ -101,11 +142,11 @@ const Question = function () {
         nextQuestion();
       }
       else {
-        quizFinish("You answered " + correctAnswers + " questions correctly!");
+        Quiz.finish();
       }
     }
     else {
-      setInfoMessage("Choose answer!");
+      UI.setInfoMessage("Choose answer!");
     }
   }
 
@@ -114,31 +155,31 @@ const Question = function () {
       previousQuestion();
     }
     else {
-      setInfoMessage("This is first question!");
+      UI.setInfoMessage("This is first question!");
     }
   }
 
   function setQuestion(id) {
-    UI.getQuestionContainer().innerHTML = allQuestions[id].question;
+    UI.getQuestionContainer().innerHTML = Quiz.getQuestionById(id).question;
     setAnswers(id);
   }
 
   function setAnswers(id) {
-    for (var i = 0; i < choicesContainers.length; i++) {
-      choicesContainers[i].innerHTML = allQuestions[id].choices[i];
-      if (allQuestions[id].userAnswer || allQuestions[id].userAnswer === 0) {
-        radioButtons[allQuestions[id].userAnswer].checked = true;
+    for (var i = 0; i < UI.getChoicesContainersSize(); i++) {
+      UI.getChoicesContainerById(i).innerHTML = Quiz.getQuestionById(id).choices[i];
+      if (Quiz.getQuestionById(id).userAnswer || Quiz.getQuestionById(id).userAnswer === 0) {
+        UI.getRadioButtonrById(Quiz.getQuestionById(id).userAnswer).checked = true;
       }
       else {
-        radioButtons[i].checked = false;
+        UI.getRadioButtonrById(i).checked = false;
       }
     }
   }
 
   function isAnyChecked() {
-    for (var i = 0; i < radioButtons.length; i++) {
-      if (radioButtons[i].checked) {
-        setInfoMessage("");
+    for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
+      if (UI.getRadioButtonrById(i).checked) {
+        UI.setInfoMessage("");
         return true;
       }
     }
@@ -146,28 +187,28 @@ const Question = function () {
   }
 
   function whichIsChecked() {
-    for (var i = 0; i < radioButtons.length; i++) {
-      if (radioButtons[i].checked) {
+    for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
+      if (UI.getRadioButtonrById(i).checked) {
         return i;
       }
     }
   }
 
   function isAnswerCorrect() {
-    return radioButtons[allQuestions[currentQuestion].correctAnswer].checked;
+    return UI.getRadioButtonrById(Quiz.getQuestionById(currentQuestion).correctAnswer).checked;
   }
 
   function notYetAnsweredCorrectly() {
-    return !(allQuestions[currentQuestion].alreadyAnswredCorrectly);
+    return !(Quiz.getQuestionById(currentQuestion).alreadyAnswredCorrectly);
   }
 
   function recordUserAnswer() {
-    allQuestions[currentQuestion].userAnswer = whichIsChecked();
+    Quiz.getQuestionById(currentQuestion).userAnswer = whichIsChecked();
   }
 
   function userAnsweredCorrectly() {
-    correctAnswers++;
-    allQuestions[currentQuestion].alreadyAnswredCorrectly = true;
+    Quiz.increaseCorrectAnswers();
+    Quiz.getQuestionById(currentQuestion).alreadyAnswredCorrectly = true;
   }
 
   function nextQuestion() {
@@ -175,13 +216,8 @@ const Question = function () {
     setQuestion(currentQuestion);
   }
 
-  function quizFinish(message) {
-    setInfoMessage(message);
-    UI.getQuizContainer().remove();
-  }
-
   function notLastQuestion() {
-    return currentQuestion !== (allQuestions.length - 1);
+    return currentQuestion !== (Quiz.getQuestionsSize() - 1);
   }
 
   function notFirstQuestion() {
@@ -191,10 +227,6 @@ const Question = function () {
   function previousQuestion() {
     currentQuestion--;
     setQuestion(currentQuestion);
-  }
-
-  function setInfoMessage(message) {
-    UI.getFinishContainer().innerHTML = message;
   }
 
   return {
