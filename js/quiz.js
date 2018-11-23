@@ -109,7 +109,7 @@ const UI = function () {
     return choicesContainers.length;
   }
 
-  function getRadioButtonrById(id) {
+  function getRadioButtonById(id) {
     return radioButtons[id];
   }
 
@@ -123,7 +123,7 @@ const UI = function () {
     getQuizContainer: getQuizContainer,
     getChoicesContainerById: getChoicesContainerById,
     getChoicesContainersSize: getChoicesContainersSize,
-    getRadioButtonrById: getRadioButtonrById,
+    getRadioButtonById: getRadioButtonById,
     getRadioButtonsSize: getRadioButtonsSize,
     setInfoMessage: setInfoMessage
   }
@@ -168,17 +168,17 @@ const Question = function () {
     for (var i = 0; i < UI.getChoicesContainersSize(); i++) {
       UI.getChoicesContainerById(i).innerHTML = Quiz.getQuestionById(id).choices[i];
       if (Quiz.getQuestionById(id).userAnswer || Quiz.getQuestionById(id).userAnswer === 0) {
-        UI.getRadioButtonrById(Quiz.getQuestionById(id).userAnswer).checked = true;
+        UI.getRadioButtonById(Quiz.getQuestionById(id).userAnswer).checked = true;
       }
       else {
-        UI.getRadioButtonrById(i).checked = false;
+        UI.getRadioButtonById(i).checked = false;
       }
     }
   }
 
   function isAnyChecked() {
     for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
-      if (UI.getRadioButtonrById(i).checked) {
+      if (UI.getRadioButtonById(i).checked) {
         UI.setInfoMessage("");
         return true;
       }
@@ -188,14 +188,14 @@ const Question = function () {
 
   function whichIsChecked() {
     for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
-      if (UI.getRadioButtonrById(i).checked) {
+      if (UI.getRadioButtonById(i).checked) {
         return i;
       }
     }
   }
 
   function isAnswerCorrect() {
-    return UI.getRadioButtonrById(Quiz.getQuestionById(currentQuestion).correctAnswer).checked;
+    return UI.getRadioButtonById(Quiz.getQuestionById(currentQuestion).correctAnswer).checked;
   }
 
   function notYetAnsweredCorrectly() {
