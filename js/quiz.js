@@ -1,48 +1,106 @@
+// Clear dependency chain, QuizApp controls UI and Questions, UI and Question don't know anything about each other or QuizApp.
+//
+
 const Quiz = function () {
-  var questions = [];
-  var correctAnswers = 0;
+  let questions = [];
+  let correctAnswers = 0;
+  let currentQuestion = 0;
 
   function run(enterElementId) {
     UI.construct(document.getElementById(enterElementId));
 
-    $.getJSON("./data/data.json", function (json) {
-      questions = json.questions;
-      Question.set(0);
+    fillQuestionsData();
+  }
+
+  function fillQuestionsData() {
+    $.getJSON('./data/data.json', function (json) {
+      for(let i = 0; i < json.questions.length; i++) {
+        questions[i] = new Questions.Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
+      }
+      UI.setQuestion(questions[0]);
     });
   }
 
-  function getQuestionById(id) {
-    return questions[id];
+  function next() {
+    if (UI.whichIsChecked()) {
+      recordUserAnswer();
+      if (isAnswerCorrect() && notYetAnsweredCorrectly()) {
+        userAnsweredCorrectly();
+      }
+      if (notLastQuestion()) {
+        nextQuestion();
+      }
+      else {
+        finish();
+      }
+    }
+    else {
+      UI.setInfoMessage('Choose answer!');
+    }
   }
 
-  function getQuestionsSize() {
-    return questions.length;
+  function back() {
+    if (notFirstQuestion()) {
+      previousQuestion();
+    }
+    else {
+      UI.setInfoMessage('This is first question!');
+    }
   }
 
-  function increaseCorrectAnswers() {
+  function isAnswerCorrect() {
+    return questions[currentQuestion].correctAnswer === questions[currentQuestion].userAnswer;
+  }
+
+  function notYetAnsweredCorrectly() {
+    return !(questions[currentQuestion].alreadyAnswredCorrectly);
+  }
+
+  function recordUserAnswer() {
+    questions[currentQuestion].userAnswer = UI.whichIsChecked();
+  }
+
+  function userAnsweredCorrectly() {
     correctAnswers++;
+    questions[currentQuestion].alreadyAnswredCorrectly = true;
   }
 
-  function finish() {
-    UI.getQuizContainer().remove();
-    UI.setInfoMessage("You answered " + correctAnswers + " questions correctly!");
+  function nextQuestion() {
+    currentQuestion++;
+    UI.setQuestion(questions[currentQuestion]);
+  }
+
+  function notLastQuestion() {
+    return currentQuestion !== (questions.length - 1);
+  }
+
+  function notFirstQuestion() {
+    return currentQuestion !== 0;
+  }
+
+  function previousQuestion() {
+    currentQuestion--;
+    UI.setQuestion(questions[currentQuestion]);
+    UI.setInfoMessage('');
+  }
+
+    function finish() {
+    UI.setInfoMessage('You answered ' + correctAnswers + ' questions correctly!');
   }
 
   return {
     run: run,
-    getQuestionById: getQuestionById,
-    getQuestionsSize: getQuestionsSize,
-    increaseCorrectAnswers: increaseCorrectAnswers,
-    finish: finish
+    next: next,
+    back: back
   }
 }();
 
 const UI = function () {
-  var questionContainer;
-  var quizContainer;
-  var infoContainer;
-  var radioButtons = [];
-  var choicesContainers = [];
+  let questionContainer;
+  let quizContainer;
+  let infoContainer;
+  let radioButtons = [];
+  let choicesContainers = [];
 
   function construct(enterElement) {
     quizContainer = document.createElement('div');
@@ -52,7 +110,7 @@ const UI = function () {
     questionContainer.setAttribute('id', 'questionContainer');
     quizContainer.appendChild(questionContainer);
 
-    for (var i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
       const choiceId = 'choice' + i;
 
       const p = document.createElement('p');
@@ -73,13 +131,13 @@ const UI = function () {
     }
 
     const backButton = document.createElement('button');
-    backButton.setAttribute('onclick', 'Question.back()');
-    backButton.appendChild(document.createTextNode("Previous question"));
+    backButton.setAttribute('onclick', 'Quiz.back()');
+    backButton.appendChild(document.createTextNode('Previous question'));
     quizContainer.appendChild(backButton);
 
     const nextButton = document.createElement('button');
-    nextButton.setAttribute('onclick', 'Question.next()');
-    nextButton.appendChild(document.createTextNode("Next question"));
+    nextButton.setAttribute('onclick', 'Quiz.next()');
+    nextButton.appendChild(document.createTextNode('Next question'));
     quizContainer.appendChild(nextButton);
 
     infoContainer = document.createElement('p');
@@ -87,6 +145,24 @@ const UI = function () {
 
     enterElement.appendChild(quizContainer);
     enterElement.appendChild(infoContainer)
+  }
+
+  function setQuestion(Question) {
+    questionContainer.innerHTML = Question.question;
+    setAnswers(Question.answers, Question.userAnswer);
+  }
+
+  function setAnswers(answers, userAnswer) {
+    for (let i = 0; i < choicesContainers.length; i++) {
+      choicesContainers[i].innerHTML = answers[i];
+      if (userAnswer !== undefined) {
+        radioButtons[userAnswer].checked = true;
+      }
+      else {
+        console
+        radioButtons[i].checked = false;
+      }
+    }
   }
 
   function setInfoMessage(message) {
@@ -117,121 +193,58 @@ const UI = function () {
     return radioButtons.length;
   }
 
-  return {
-    construct: construct,
-    getQuestionContainer: getQuestionContainer,
-    getQuizContainer: getQuizContainer,
-    getChoicesContainerById: getChoicesContainerById,
-    getChoicesContainersSize: getChoicesContainersSize,
-    getRadioButtonById: getRadioButtonById,
-    getRadioButtonsSize: getRadioButtonsSize,
-    setInfoMessage: setInfoMessage
-  }
-}();
-
-const Question = function () {
-  var currentQuestion = 0;
-
-  function next() {
-    if (isAnyChecked()) {
-      recordUserAnswer();
-      if (isAnswerCorrect() && notYetAnsweredCorrectly()) {
-        userAnsweredCorrectly();
-      }
-      if (notLastQuestion()) {
-        nextQuestion();
-      }
-      else {
-        Quiz.finish();
-      }
-    }
-    else {
-      UI.setInfoMessage("Choose answer!");
-    }
-  }
-
-  function back() {
-    if (notFirstQuestion()) {
-      previousQuestion();
-    }
-    else {
-      UI.setInfoMessage("This is first question!");
-    }
-  }
-
-  function setQuestion(id) {
-    UI.getQuestionContainer().innerHTML = Quiz.getQuestionById(id).question;
-    setAnswers(id);
-  }
-
-  function setAnswers(id) {
-    for (var i = 0; i < UI.getChoicesContainersSize(); i++) {
-      UI.getChoicesContainerById(i).innerHTML = Quiz.getQuestionById(id).choices[i];
-      if (Quiz.getQuestionById(id).userAnswer || Quiz.getQuestionById(id).userAnswer === 0) {
-        UI.getRadioButtonById(Quiz.getQuestionById(id).userAnswer).checked = true;
-      }
-      else {
-        UI.getRadioButtonById(i).checked = false;
-      }
-    }
-  }
-
-  function isAnyChecked() {
-    for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
-      if (UI.getRadioButtonById(i).checked) {
-        UI.setInfoMessage("");
-        return true;
+  function whichIsChecked() {
+    for (let i = 0; i < radioButtons.length; i++) {
+      if (radioButtons[i].checked) {
+        setInfoMessage('');
+        return i;
       }
     }
     return false;
   }
 
-  function whichIsChecked() {
-    for (var i = 0; i < UI.getRadioButtonsSize(); i++) {
-      if (UI.getRadioButtonById(i).checked) {
-        return i;
-      }
-    }
+  return {
+    construct,
+    setQuestion: setQuestion,
+    setInfoMessage: setInfoMessage,
+    whichIsChecked: whichIsChecked
+  }
+}();
+
+const Questions = function () {
+  let question;
+  let answers;
+  let correctAnswer;
+  let userAnswer;
+
+  function Question(question, answers, correctAnswer, userAnswer) {
+    this.question = question;
+    this.answers = answers;
+    this.correctAnswer = correctAnswer;
+    this.userAnswer = userAnswer;
   }
 
-  function isAnswerCorrect() {
-    return UI.getRadioButtonById(Quiz.getQuestionById(currentQuestion).correctAnswer).checked;
+  function getQuestion() {
+    return question;
   }
 
-  function notYetAnsweredCorrectly() {
-    return !(Quiz.getQuestionById(currentQuestion).alreadyAnswredCorrectly);
+  function getAnswers() {
+    return answers;
   }
 
-  function recordUserAnswer() {
-    Quiz.getQuestionById(currentQuestion).userAnswer = whichIsChecked();
+  function getCorrectAnswerId() {
+    return correctAnswer;
   }
 
-  function userAnsweredCorrectly() {
-    Quiz.increaseCorrectAnswers();
-    Quiz.getQuestionById(currentQuestion).alreadyAnswredCorrectly = true;
-  }
-
-  function nextQuestion() {
-    currentQuestion++;
-    setQuestion(currentQuestion);
-  }
-
-  function notLastQuestion() {
-    return currentQuestion !== (Quiz.getQuestionsSize() - 1);
-  }
-
-  function notFirstQuestion() {
-    return currentQuestion !== 0;
-  }
-
-  function previousQuestion() {
-    currentQuestion--;
-    setQuestion(currentQuestion);
+    function getUserAnswer() {
+    return userAnswer;
   }
 
   return {
-    next: next,
-    back: back,
-    set: setQuestion
+    Question: Question,
+    getQuestion: getQuestion,
+    getAnswers: getAnswers,
+    getCorrectAnswerId: getCorrectAnswerId,
+    getUserAnswer: getUserAnswer
   }
 }();

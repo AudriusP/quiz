@@ -1,5 +1,5 @@
 {"questions":[
-  {"question": "Who is President of Lithuania?", "choices": ["Valdas Adamkus", "Dalia Grybauskaite", "Rolandas Paksas", "Vytautas Landsbergis"], "correctAnswer":1},
-  {"question": "Who is Prime Minister of the Lithuania?", "choices": ["Pranskietis", "Prunskiene", "Skvernelis", "Grauziniene"], "correctAnswer":2},
-  {"question": "Who is Strongest man of the Lithuania?", "choices": ["Savickas", "Blekaitas", "Lalas", "Vysniauskas"], "correctAnswer":0}
+  {"question": "Who is President of Lithuania?", "answers": ["Valdas Adamkus", "Dalia Grybauskaite", "Rolandas Paksas", "Vytautas Landsbergis"], "correctAnswer":1, "userAnswer":""},
+  {"question": "Who is Prime Minister of the Lithuania?", "answers": ["Pranskietis", "Prunskiene", "Skvernelis", "Grauziniene"], "correctAnswer":2, "userAnswer":""},
+  {"question": "Who is Strongest man of the Lithuania?", "answers": ["Savickas", "Blekaitas", "Lalas", "Vysniauskas"], "correctAnswer":0, "userAnswer":""}
 ]}
