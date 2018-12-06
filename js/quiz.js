@@ -15,7 +15,7 @@ const Quiz = function () {
   function fillQuestionsData() {
     $.getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
-        questions[i] = new Questions.Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
+        questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
       UI.setQuestion(questions[0]);
     });
@@ -49,20 +49,19 @@ const Quiz = function () {
   }
 
   function isAnswerCorrect() {
-    return questions[currentQuestion].correctAnswer === questions[currentQuestion].userAnswer;
+    return questions[currentQuestion].getCorrectAnswerId() === questions[currentQuestion].getUserAnswer();
   }
 
   function notYetAnsweredCorrectly() {
-    return !(questions[currentQuestion].alreadyAnswredCorrectly);
+    return !(questions[currentQuestion].getCorrectAnswerId() === questions[currentQuestion].getUserAnswer());
   }
 
   function recordUserAnswer() {
-    questions[currentQuestion].userAnswer = UI.whichIsChecked();
+    questions[currentQuestion].setUserAnswer(UI.whichIsChecked());
   }
 
   function userAnsweredCorrectly() {
     correctAnswers++;
-    questions[currentQuestion].alreadyAnswredCorrectly = true;
   }
 
   function nextQuestion() {
@@ -148,8 +147,8 @@ const UI = function () {
   }
 
   function setQuestion(Question) {
-    questionContainer.innerHTML = Question.question;
-    setAnswers(Question.answers, Question.userAnswer);
+    questionContainer.innerHTML = Question.getQuestion();
+    setAnswers(Question.getAnswers(), Question.getUserAnswer());
   }
 
   function setAnswers(answers, userAnswer) {
@@ -211,40 +210,37 @@ const UI = function () {
   }
 }();
 
-const Questions = function () {
-  let question;
-  let answers;
-  let correctAnswer;
-  let userAnswer;
-
-  function Question(question, answers, correctAnswer, userAnswer) {
-    this.question = question;
-    this.answers = answers;
-    this.correctAnswer = correctAnswer;
-    this.userAnswer = userAnswer;
-  }
+function Question(question, answers, correctAnswer) {
+  const _question = question;
+  const _answers = answers;
+  const _correctAnswer = correctAnswer;
+  let _userAnswer ;
 
   function getQuestion() {
-    return question;
+    return _question;
   }
 
   function getAnswers() {
-    return answers;
+    return _answers;
   }
 
   function getCorrectAnswerId() {
-    return correctAnswer;
+    return _correctAnswer;
   }
 
     function getUserAnswer() {
-    return userAnswer;
+    return _userAnswer;
+  }
+
+  function setUserAnswer(answerId) {
+    _userAnswer = answerId;
   }
 
   return {
-    Question: Question,
     getQuestion: getQuestion,
     getAnswers: getAnswers,
     getCorrectAnswerId: getCorrectAnswerId,
-    getUserAnswer: getUserAnswer
+    getUserAnswer: getUserAnswer,
+    setUserAnswer: setUserAnswer
   }
-}();
+};
