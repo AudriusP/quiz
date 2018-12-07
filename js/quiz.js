@@ -1,12 +1,19 @@
 // Clear dependency chain, QuizApp controls UI and Questions, UI and Question don't know anything about each other or QuizApp.
+// onclick not via attribute
+// Quiz.destroy method
+// userAnswers Quiz'e
+// no answeredCorrectly method - finish, then calculate
+// duplications (dry) - createElement, etc
+// require, export - common.js modulius - still works
 
 const Quiz = function () {
   let questions = [];
   let correctAnswers = 0;
   let currentQuestion = 0;
+  let userAnswers = [];
 
   function run(enterElementId) {
-    UI.construct(document.getElementById(enterElementId));
+    UI.construct(document.getElementById(enterElementId), next, back);
 
     fillQuestionsData();
   }
@@ -89,8 +96,9 @@ const Quiz = function () {
 
   return {
     run: run,
-    next: next,
-    back: back
+    //destroy
+    //next: next,
+    //back: back
   }
 }();
 
@@ -101,7 +109,7 @@ const UI = function () {
   let radioButtons = [];
   let choicesContainers = [];
 
-  function construct(enterElement) {
+  function construct(enterElement, next, back) {
     quizContainer = document.createElement('div');
     quizContainer.setAttribute('id', 'quiz');
 
@@ -130,12 +138,12 @@ const UI = function () {
     }
 
     const backButton = document.createElement('button');
-    backButton.setAttribute('onclick', 'Quiz.back()');
+    backButton.onclick = back;
     backButton.appendChild(document.createTextNode('Previous question'));
     quizContainer.appendChild(backButton);
 
     const nextButton = document.createElement('button');
-    nextButton.setAttribute('onclick', 'Quiz.next()');
+    nextButton.onclick = next;
     nextButton.appendChild(document.createTextNode('Next question'));
     quizContainer.appendChild(nextButton);
 
@@ -158,7 +166,6 @@ const UI = function () {
         radioButtons[userAnswer].checked = true;
       }
       else {
-        console
         radioButtons[i].checked = false;
       }
     }
@@ -216,6 +223,7 @@ function Question(question, answers, correctAnswer) {
   const _correctAnswer = correctAnswer;
   let _userAnswer;
   let _answeredCorrectly;
+  //user answers kitur
 
   function getQuestion() {
     return _question;
@@ -254,4 +262,8 @@ function Question(question, answers, correctAnswer) {
     getAnsweredCorrectly: getAnsweredCorrectly,
     setAnsweredCorrectly: setAnsweredCorrectly
   }
+};
+
+module.exports = {
+  Quiz
 };
