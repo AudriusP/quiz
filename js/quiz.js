@@ -1,5 +1,4 @@
 // Clear dependency chain, QuizApp controls UI and Questions, UI and Question don't know anything about each other or QuizApp.
-//
 
 const Quiz = function () {
   let questions = [];
@@ -22,7 +21,7 @@ const Quiz = function () {
   }
 
   function next() {
-    if (UI.whichIsChecked()) {
+    if (UI.whichIsChecked() != -1) {
       recordUserAnswer();
       if (isAnswerCorrect() && notYetAnsweredCorrectly()) {
         userAnsweredCorrectly();
@@ -48,29 +47,30 @@ const Quiz = function () {
     }
   }
 
-  function isAnswerCorrect() {
-    return questions[currentQuestion].getCorrectAnswerId() === questions[currentQuestion].getUserAnswer();
-  }
-
-  function notYetAnsweredCorrectly() {
-    return !(questions[currentQuestion].getCorrectAnswerId() === questions[currentQuestion].getUserAnswer());
-  }
-
   function recordUserAnswer() {
     questions[currentQuestion].setUserAnswer(UI.whichIsChecked());
   }
 
+  function isAnswerCorrect() {
+    return (questions[currentQuestion].getCorrectAnswerId() === questions[currentQuestion].getUserAnswer());
+  }
+
+  function notYetAnsweredCorrectly() {
+    return !questions[currentQuestion].getAnsweredCorrectly();
+  }
+
   function userAnsweredCorrectly() {
+    questions[currentQuestion].setAnsweredCorrectly(true);
     correctAnswers++;
+  }
+
+  function notLastQuestion() {
+    return currentQuestion !== (questions.length - 1);
   }
 
   function nextQuestion() {
     currentQuestion++;
     UI.setQuestion(questions[currentQuestion]);
-  }
-
-  function notLastQuestion() {
-    return currentQuestion !== (questions.length - 1);
   }
 
   function notFirstQuestion() {
@@ -199,7 +199,7 @@ const UI = function () {
         return i;
       }
     }
-    return false;
+    return -1;
   }
 
   return {
@@ -214,7 +214,8 @@ function Question(question, answers, correctAnswer) {
   const _question = question;
   const _answers = answers;
   const _correctAnswer = correctAnswer;
-  let _userAnswer ;
+  let _userAnswer;
+  let _answeredCorrectly;
 
   function getQuestion() {
     return _question;
@@ -228,7 +229,7 @@ function Question(question, answers, correctAnswer) {
     return _correctAnswer;
   }
 
-    function getUserAnswer() {
+  function getUserAnswer() {
     return _userAnswer;
   }
 
@@ -236,11 +237,21 @@ function Question(question, answers, correctAnswer) {
     _userAnswer = answerId;
   }
 
+  function getAnsweredCorrectly() {
+    return _answeredCorrectly;
+  }
+
+  function setAnsweredCorrectly(answeredCorrectly) {
+    _answeredCorrectly = answeredCorrectly;
+  }
+
   return {
     getQuestion: getQuestion,
     getAnswers: getAnswers,
     getCorrectAnswerId: getCorrectAnswerId,
     getUserAnswer: getUserAnswer,
-    setUserAnswer: setUserAnswer
+    setUserAnswer: setUserAnswer,
+    getAnsweredCorrectly: getAnsweredCorrectly,
+    setAnsweredCorrectly: setAnsweredCorrectly
   }
 };
