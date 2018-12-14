@@ -1,3 +1,3 @@
-const Quiz = require('./quiz').Quiz;
+const Quiz = require('./quiz');
 
 Quiz.run('app');
