@@ -131,61 +131,44 @@ function destroy() {
   destroy
 };
 },{"./question":2,"./ui":4}],4:[function(require,module,exports){
+// igyvendinti jquire .attr {}
+// perpiesiant
+//function createAnswerContainer(choiseid) {
+//  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
+//}
+// paduoti objekta su atributais ir priskirti, iteracija su objektu raktais
+
 let questionContainer;
 let quizContainer;
 let infoContainer;
 let radioButtons = [];
 let choicesContainers = [];
 
-// perpiesiant
-//function createAnswerContainer(choiseid) {
-//  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
-//}
-
 function construct(enterElement, next, back) {
-  quizContainer = create('div');
-  quizContainer.setAttribute('id', 'quiz');
+  quizContainer = create('div', {id: 'quiz'});
 
-  questionContainer = create('p');
-  questionContainer.id = 'questionContainer';
+  questionContainer = create('p', {id: 'questionContainer'});
   quizContainer.appendChild(questionContainer);
-
-
-//create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: 'choiceId'}, )]);
-
 
   for (let i = 0; i < 4; i++) {
     const choiceId = 'choice' + i;
 
     const p = create('p');
-// igyvendinti jquire .attr {}
-    const input = create('input');
-    input.name = 'answer';
-    input.type = 'radio';
-    input.id = choiceId;
+    const input = create('input', {name: 'answer', type: 'radio', id: choiceId});
     p.appendChild(input);
     radioButtons.push(input);
 
-    const label = create('label');
-    label.setAttribute('for', choiceId);
+    const label = create('label', {htmlFor: choiceId});
     p.appendChild(label);
     choicesContainers.push(label);
 
     quizContainer.appendChild(p);
   }
 
-  const backButton = create('button');
-  backButton.onclick = back;
-  backButton.appendChild(createText('Previous question'));
-  quizContainer.appendChild(backButton);
+  quizContainer.appendChild(create('button', {onclick: back}, [createText('Previous question')]));
+  quizContainer.appendChild(create('button', {onclick: next}, [createText('Next question')]));
 
-  const nextButton = create('button');
-  nextButton.onclick = next;
-  nextButton.appendChild(createText('Next question'));
-  quizContainer.appendChild(nextButton);
-
-  infoContainer = create('p');
-  infoContainer.id = 'infoMessage';
+  infoContainer = create('p', {id: 'infoMessage'});
 
   enterElement.appendChild(quizContainer);
   enterElement.appendChild(infoContainer)
@@ -226,11 +209,21 @@ function clearQuiz() {
   quizContainer.remove();
 }
 
-// paduoti objekta su atributais ir priskirti
-//iteracija su objektu raktais
-//
 function create(elementType, attributes, children) {
-  return document.createElement(elementType);
+  const element = document.createElement(elementType);
+
+  for(let key in attributes) {
+    console.log(key, attributes[key]);
+    element[key] = attributes[key];
+  }
+
+  if(children) {
+    for(let i = 0; i < children.length; i++) {
+      element.appendChild(children[i]);
+    }
+  }
+
+  return element;
 }
 
 function createText(text) {
