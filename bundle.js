@@ -47,7 +47,6 @@ function run(enterElementId) {
   enterElement = document.getElementById(enterElementId);
 
   UI.construct(enterElement, next, back);
-
   fillQuestionsData();
 }
 
@@ -138,66 +137,58 @@ function destroy() {
 //}
 // paduoti objekta su atributais ir priskirti, iteracija su objektu raktais
 
-let questionContainer;
-let quizContainer;
-let infoContainer;
-let radioButtons = [];
-let choicesContainers = [];
+let choicesIds = [];
 
 function construct(enterElement, next, back) {
-  quizContainer = create('div', {id: 'quiz'});
+  enterElement.appendChild(create('div', {id: 'quiz'}, [
+    create('p', {id: 'questionContainer'}),
+    createChoices(4),
+    create('button', {onclick: back}, [createText('Previous question')]),
+    create('button', {onclick: next}, [createText('Next question')])
+    ]));
+  enterElement.appendChild(create('p', {id: 'infoMessage'}));
+}
 
-  questionContainer = create('p', {id: 'questionContainer'});
-  quizContainer.appendChild(questionContainer);
-
-  for (let i = 0; i < 4; i++) {
-    const choiceId = 'choice' + i;
-
-    const p = create('p');
-    const input = create('input', {name: 'answer', type: 'radio', id: choiceId});
-    p.appendChild(input);
-    radioButtons.push(input);
-
-    const label = create('label', {htmlFor: choiceId});
-    p.appendChild(label);
-    choicesContainers.push(label);
-
-    quizContainer.appendChild(p);
+function createChoices(choicesNumber) {
+  const choicesContainer = create('p');
+  for (let i = 0; i < choicesNumber; i++) {
+    choicesIds.push('choice' + i);
+    choicesContainer.appendChild(createChoiceContainer(choicesIds[i]));
   }
+  return choicesContainer;
+}
 
-  quizContainer.appendChild(create('button', {onclick: back}, [createText('Previous question')]));
-  quizContainer.appendChild(create('button', {onclick: next}, [createText('Next question')]));
-
-  infoContainer = create('p', {id: 'infoMessage'});
-
-  enterElement.appendChild(quizContainer);
-  enterElement.appendChild(infoContainer)
+function createChoiceContainer(choiceId) {
+  return create('p', {}, [
+    create('input', {name: 'answer', type: 'radio', id: choiceId}),
+    create('label', {htmlFor: choiceId})
+    ]);
 }
 
 function setQuestion(Question, userAnswer) {
-  questionContainer.innerHTML = Question.getQuestion();
+  document.getElementById('questionContainer').innerHTML = Question.getQuestion();
   setAnswers(Question.getAnswers(), userAnswer);
 }
 
 function setAnswers(answers, userAnswer) {
-  for (let i = 0; i < choicesContainers.length; i++) {
-    choicesContainers[i].innerHTML = answers[i];
+  for (let i = 0; i < choicesIds.length; i++) {
+    getEl(choicesIds[i]).parentNode.getElementsByTagName('label')[0].innerHTML = answers[i];
     if (userAnswer !== undefined) {
-      radioButtons[userAnswer].checked = true;
+      getEl(choicesIds[userAnswer]).checked = true;
     }
     else {
-      radioButtons[i].checked = false;
+      getEl(choicesIds[i]).checked = false;
     }
   }
 }
 
 function setInfoMessage(message) {
-  infoContainer.innerHTML = message;
+  getEl('infoMessage').innerHTML = message;
 }
 
 function whichIsChecked() {
-  for (let i = 0; i < radioButtons.length; i++) {
-    if (radioButtons[i].checked) {
+  for (let i = 0; i < choicesIds.length; i++) {
+    if (getEl(choicesIds[i]).checked) {
       setInfoMessage('');
       return i;
     }
@@ -206,14 +197,13 @@ function whichIsChecked() {
 }
 
 function clearQuiz() {
-  quizContainer.remove();
+  getEl('quiz').remove();
 }
 
 function create(elementType, attributes, children) {
   const element = document.createElement(elementType);
 
   for(let key in attributes) {
-    console.log(key, attributes[key]);
     element[key] = attributes[key];
   }
 
@@ -228,6 +218,10 @@ function create(elementType, attributes, children) {
 
 function createText(text) {
   return document.createTextNode(text);
+}
+
+function getEl(elementId) {
+  return document.getElementById(elementId);
 }
 
 module.exports = {

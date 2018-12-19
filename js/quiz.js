@@ -16,7 +16,6 @@ function run(enterElementId) {
   enterElement = document.getElementById(enterElementId);
 
   UI.construct(enterElement, next, back);
-
   fillQuestionsData();
 }
 
