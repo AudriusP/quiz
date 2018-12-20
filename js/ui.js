@@ -111,4 +111,4 @@ module.exports = {
   setInfoMessage,
   whichIsChecked,
   clearQuiz
-}
+};
