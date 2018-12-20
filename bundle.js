@@ -29,13 +29,6 @@ function Question(question, answers, correctAnswer) {
 
 module.exports = Question;
 },{}],3:[function(require,module,exports){
-// Clear dependency chain, QuizApp controls UI and Questions, UI and Question don't know anything about each other or QuizApp.
-// onclick not via attribute +
-// Quiz.destroy method
-// userAnswers Quiz'e +
-// no answeredCorrectly method - finish, then calculate +
-// duplications (dry) - createElement, etc +
-// require, export - common.js modulius - still works +
 const Question = require('./question');
 const UI = require('./ui');
 
@@ -46,16 +39,11 @@ let userAnswers = [];
 function run(enterElementId) {
   enterElement = document.getElementById(enterElementId);
 
-  UI.construct(enterElement, next, back);
-  fillQuestionsData();
-}
-
-function fillQuestionsData() {
   $.getJSON('./data/data.json', function (json) {
     for(let i = 0; i < json.questions.length; i++) {
       questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
     }
-    UI.setQuestion(questions[0]);
+    UI.render(enterElement, next, back, questions[0]);
   });
 }
 
@@ -93,7 +81,8 @@ function notLastQuestion() {
 
 function nextQuestion() {
   currentQuestion++;
-  UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
+  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
 }
 
 function notFirstQuestion() {
@@ -102,8 +91,9 @@ function notFirstQuestion() {
 
 function previousQuestion() {
   currentQuestion--;
-  UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-  UI.setInfoMessage('');
+  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setInfoMessage('');
 }
 
 function getCorrectAnswersCount() {
@@ -123,14 +113,13 @@ function finish() {
 }
 
 function destroy() {
- }
+}
 
- module.exports = {
+module.exports = {
   run,
   destroy
 };
 },{"./question":2,"./ui":4}],4:[function(require,module,exports){
-// igyvendinti jquire .attr {}
 // perpiesiant
 //function createAnswerContainer(choiseid) {
 //  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
@@ -139,7 +128,10 @@ function destroy() {
 
 let choicesIds = [];
 
-function construct(enterElement, next, back) {
+function render(enterElement, next, back, Question, userAnswer) {
+  clearQuiz();
+  clearInfoMessage();
+
   enterElement.appendChild(create('div', {id: 'quiz'}, [
     create('p', {id: 'questionContainer'}),
     createChoices(4),
@@ -147,10 +139,13 @@ function construct(enterElement, next, back) {
     create('button', {onclick: next}, [createText('Next question')])
     ]));
   enterElement.appendChild(create('p', {id: 'infoMessage'}));
+
+  setQuestion(Question, userAnswer);
 }
 
 function createChoices(choicesNumber) {
   const choicesContainer = create('p');
+  choicesIds = [];
   for (let i = 0; i < choicesNumber; i++) {
     choicesIds.push('choice' + i);
     choicesContainer.appendChild(createChoiceContainer(choicesIds[i]));
@@ -197,7 +192,15 @@ function whichIsChecked() {
 }
 
 function clearQuiz() {
-  getEl('quiz').remove();
+  if(getEl('quiz')) {
+    getEl('quiz').remove();
+  }
+}
+
+function clearInfoMessage() {
+  if(getEl('infoMessage')) {
+    getEl('infoMessage').remove();
+  }
 }
 
 function create(elementType, attributes, children) {
@@ -225,7 +228,7 @@ function getEl(elementId) {
 }
 
 module.exports = {
-  construct,
+  render,
   setQuestion,
   setInfoMessage,
   whichIsChecked,

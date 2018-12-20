@@ -1,4 +1,3 @@
-// igyvendinti jquire .attr {}
 // perpiesiant
 //function createAnswerContainer(choiseid) {
 //  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
@@ -7,7 +6,10 @@
 
 let choicesIds = [];
 
-function construct(enterElement, next, back) {
+function render(enterElement, next, back, Question, userAnswer) {
+  clearQuiz();
+  clearInfoMessage();
+
   enterElement.appendChild(create('div', {id: 'quiz'}, [
     create('p', {id: 'questionContainer'}),
     createChoices(4),
@@ -15,10 +17,13 @@ function construct(enterElement, next, back) {
     create('button', {onclick: next}, [createText('Next question')])
     ]));
   enterElement.appendChild(create('p', {id: 'infoMessage'}));
+
+  setQuestion(Question, userAnswer);
 }
 
 function createChoices(choicesNumber) {
   const choicesContainer = create('p');
+  choicesIds = [];
   for (let i = 0; i < choicesNumber; i++) {
     choicesIds.push('choice' + i);
     choicesContainer.appendChild(createChoiceContainer(choicesIds[i]));
@@ -65,7 +70,15 @@ function whichIsChecked() {
 }
 
 function clearQuiz() {
-  getEl('quiz').remove();
+  if(getEl('quiz')) {
+    getEl('quiz').remove();
+  }
+}
+
+function clearInfoMessage() {
+  if(getEl('infoMessage')) {
+    getEl('infoMessage').remove();
+  }
 }
 
 function create(elementType, attributes, children) {
@@ -93,7 +106,7 @@ function getEl(elementId) {
 }
 
 module.exports = {
-  construct,
+  render,
   setQuestion,
   setInfoMessage,
   whichIsChecked,

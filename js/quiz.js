@@ -8,17 +8,11 @@ let userAnswers = [];
 function run(enterElementId) {
   enterElement = document.getElementById(enterElementId);
 
-  UI.construct(enterElement, next, back);
-  
-  fillQuestionsData();
-}
-
-function fillQuestionsData() {
   $.getJSON('./data/data.json', function (json) {
     for(let i = 0; i < json.questions.length; i++) {
       questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
     }
-    UI.setQuestion(questions[0]);
+    UI.render(enterElement, next, back, questions[0]);
   });
 }
 
@@ -56,7 +50,8 @@ function notLastQuestion() {
 
 function nextQuestion() {
   currentQuestion++;
-  UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
+  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
 }
 
 function notFirstQuestion() {
@@ -65,8 +60,9 @@ function notFirstQuestion() {
 
 function previousQuestion() {
   currentQuestion--;
-  UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-  UI.setInfoMessage('');
+  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
+  //UI.setInfoMessage('');
 }
 
 function getCorrectAnswersCount() {
@@ -86,9 +82,9 @@ function finish() {
 }
 
 function destroy() {
- }
+}
 
- module.exports = {
+module.exports = {
   run,
   destroy
 };
