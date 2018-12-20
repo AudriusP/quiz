@@ -1,10 +1,3 @@
-// Clear dependency chain, QuizApp controls UI and Questions, UI and Question don't know anything about each other or QuizApp.
-// onclick not via attribute +
-// Quiz.destroy method
-// userAnswers Quiz'e +
-// no answeredCorrectly method - finish, then calculate +
-// duplications (dry) - createElement, etc +
-// require, export - common.js modulius - still works +
 const Question = require('./question');
 const UI = require('./ui');
 
@@ -16,6 +9,7 @@ function run(enterElementId) {
   enterElement = document.getElementById(enterElementId);
 
   UI.construct(enterElement, next, back);
+  
   fillQuestionsData();
 }
 
