@@ -1,56 +1,58 @@
 const Question = require('./question');
-const UI = require('./ui');
 
-let questions = [];
-let currentQuestion = 0;
-let userAnswers = [];
 
-function run(enterElementId) {
-  enterElement = document.getElementById(enterElementId);
+function Quiz(UI, getJSON) {
+  let questions = [];
+  let currentQuestion = 0;
+  let userAnswers = [];
+  let _enterElementId;
 
-  $.getJSON('./data/data.json', function (json) {
-    for(let i = 0; i < json.questions.length; i++) {
-      questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
-    }
-    UI.render(enterElement, next, back, questions[0]);
-  });
-}
+  function run(enterElementId) {
+    _enterElementId = enterElementId;
 
-function next() {
-  if (UI.whichIsChecked() != -1) {
-    recordUserAnswer();
-    if (notLastQuestion()) {
-      nextQuestion();
+    getJSON('./data/data.json', function (json) {
+      for(let i = 0; i < json.questions.length; i++) {
+        questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
+      }
+      UI.render(_enterElementId, next, back, questions[0]);
+    });
+  }
+
+  function next() {
+    if (UI.whichIsChecked() != -1) {
+      recordUserAnswer();
+      if (notLastQuestion()) {
+        nextQuestion();
+      }
+      else {
+        finish();
+      }
     }
     else {
-      finish();
+      UI.setInfoMessage('Choose answer!');
     }
   }
-  else {
-    UI.setInfoMessage('Choose answer!');
+
+  function back() {
+    if (notFirstQuestion()) {
+      previousQuestion();
+    }
+    else {
+      UI.setInfoMessage('This is first question!');
+    }
   }
-}
 
-function back() {
-  if (notFirstQuestion()) {
-    previousQuestion();
+  function recordUserAnswer() {
+    userAnswers[currentQuestion] = UI.whichIsChecked();
   }
-  else {
-    UI.setInfoMessage('This is first question!');
+
+  function notLastQuestion() {
+    return currentQuestion !== (questions.length - 1);
   }
-}
 
-function recordUserAnswer() {
-  userAnswers[currentQuestion] = UI.whichIsChecked();
-}
-
-function notLastQuestion() {
-  return currentQuestion !== (questions.length - 1);
-}
-
-function nextQuestion() {
-  currentQuestion++;
-  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  function nextQuestion() {
+    currentQuestion++;
+    UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
 }
 
@@ -60,7 +62,7 @@ function notFirstQuestion() {
 
 function previousQuestion() {
   currentQuestion--;
-  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setInfoMessage('');
 }
@@ -81,10 +83,9 @@ function finish() {
   UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
 }
 
-function destroy() {
+return {
+  run
+}
 }
 
-module.exports = {
-  run,
-  destroy
-};
+module.exports = Quiz;

@@ -1,8 +1,9 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const Quiz = require('./quiz');
+const UI = require('./ui');
 
-Quiz.run('app');
-},{"./quiz":3}],2:[function(require,module,exports){
+Quiz(UI(document), $.getJSON).run('app');
+},{"./quiz":3,"./ui":4}],2:[function(require,module,exports){
 function Question(question, answers, correctAnswer) {
   const _question = question;
   const _answers = answers;
@@ -30,58 +31,60 @@ function Question(question, answers, correctAnswer) {
 module.exports = Question;
 },{}],3:[function(require,module,exports){
 const Question = require('./question');
-const UI = require('./ui');
 
-let questions = [];
-let currentQuestion = 0;
-let userAnswers = [];
 
-function run(enterElementId) {
-  enterElement = document.getElementById(enterElementId);
+function Quiz(UI, getJSON) {
+  let questions = [];
+  let currentQuestion = 0;
+  let userAnswers = [];
+  let _enterElementId;
 
-  $.getJSON('./data/data.json', function (json) {
-    for(let i = 0; i < json.questions.length; i++) {
-      questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
-    }
-    UI.render(enterElement, next, back, questions[0]);
-  });
-}
+  function run(enterElementId) {
+    _enterElementId = enterElementId;
 
-function next() {
-  if (UI.whichIsChecked() != -1) {
-    recordUserAnswer();
-    if (notLastQuestion()) {
-      nextQuestion();
+    getJSON('./data/data.json', function (json) {
+      for(let i = 0; i < json.questions.length; i++) {
+        questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
+      }
+      UI.render(_enterElementId, next, back, questions[0]);
+    });
+  }
+
+  function next() {
+    if (UI.whichIsChecked() != -1) {
+      recordUserAnswer();
+      if (notLastQuestion()) {
+        nextQuestion();
+      }
+      else {
+        finish();
+      }
     }
     else {
-      finish();
+      UI.setInfoMessage('Choose answer!');
     }
   }
-  else {
-    UI.setInfoMessage('Choose answer!');
+
+  function back() {
+    if (notFirstQuestion()) {
+      previousQuestion();
+    }
+    else {
+      UI.setInfoMessage('This is first question!');
+    }
   }
-}
 
-function back() {
-  if (notFirstQuestion()) {
-    previousQuestion();
+  function recordUserAnswer() {
+    userAnswers[currentQuestion] = UI.whichIsChecked();
   }
-  else {
-    UI.setInfoMessage('This is first question!');
+
+  function notLastQuestion() {
+    return currentQuestion !== (questions.length - 1);
   }
-}
 
-function recordUserAnswer() {
-  userAnswers[currentQuestion] = UI.whichIsChecked();
-}
-
-function notLastQuestion() {
-  return currentQuestion !== (questions.length - 1);
-}
-
-function nextQuestion() {
-  currentQuestion++;
-  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  function nextQuestion() {
+    currentQuestion++;
+    UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
 }
 
@@ -91,7 +94,7 @@ function notFirstQuestion() {
 
 function previousQuestion() {
   currentQuestion--;
-  UI.render(enterElement, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setInfoMessage('');
 }
@@ -112,26 +115,25 @@ function finish() {
   UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
 }
 
-function destroy() {
+return {
+  run
+}
 }
 
-module.exports = {
-  run,
-  destroy
-};
-},{"./question":2,"./ui":4}],4:[function(require,module,exports){
-// perpiesiant
-//function createAnswerContainer(choiseid) {
-//  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
-//}
-// paduoti objekta su atributais ir priskirti, iteracija su objektu raktais
+module.exports = Quiz;
 
+},{"./question":2}],4:[function(require,module,exports){
+// Pabandyti užsimokinti UI
+// document.createElement -> return []?
+
+function UI(document) {
 let choicesIds = [];
 
-function render(enterElement, next, back, Question, userAnswer) {
+function render(enterElementId, next, back, Question, userAnswer) {
   clearQuiz();
   clearInfoMessage();
 
+  enterElement = getEl(enterElementId);
   enterElement.appendChild(create('div', {id: 'quiz'}, [
     create('p', {id: 'questionContainer'}),
     createChoices(4),
@@ -227,11 +229,15 @@ function getEl(elementId) {
   return document.getElementById(elementId);
 }
 
-module.exports = {
+return {
   render,
   setQuestion,
   setInfoMessage,
   whichIsChecked,
   clearQuiz
 }
+}
+
+module.exports = UI;
+
 },{}]},{},[1]);

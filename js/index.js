@@ -1,3 +1,4 @@
 const Quiz = require('./quiz');
+const UI = require('./ui');
 
-Quiz.run('app');
+Quiz(UI(document), $.getJSON).run('app');

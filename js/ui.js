@@ -1,15 +1,14 @@
-// perpiesiant
-//function createAnswerContainer(choiseid) {
-//  return create('p', {}, [create('input', {name: 'answer', type: 'radio', id: choiseid}, ), create('label', {for: choiceId, id: choiseid}, )]);
-//}
-// paduoti objekta su atributais ir priskirti, iteracija su objektu raktais
+// Pabandyti užsimokinti UI
+// document.createElement -> return []?
 
+function UI(document) {
 let choicesIds = [];
 
-function render(enterElement, next, back, Question, userAnswer) {
+function render(enterElementId, next, back, Question, userAnswer) {
   clearQuiz();
   clearInfoMessage();
 
+  enterElement = getEl(enterElementId);
   enterElement.appendChild(create('div', {id: 'quiz'}, [
     create('p', {id: 'questionContainer'}),
     createChoices(4),
@@ -105,10 +104,13 @@ function getEl(elementId) {
   return document.getElementById(elementId);
 }
 
-module.exports = {
+return {
   render,
   setQuestion,
   setInfoMessage,
   whichIsChecked,
   clearQuiz
-};
+}
+}
+
+module.exports = UI;
