@@ -12,11 +12,27 @@ const fakeUI ={
 
 const fakeDocument = {
 	getElementById() {
-		return {
-			remove() {}
-		} },
+		return fakeElement;
+	},
+	getElementsByTagName() {
+		return [fakeElement];
+	},
 	createElement() {
+		return fakeElement;
+	},
+	createTextNode() {}
+}
 
+const fakeElement = {
+	appendChild() {},
+	remove() {},
+	parentNode: fakeDocument
+}
+
+const fakeQuestion = {
+	getQuestion() {},
+	getAnswers() {
+		return [];
 	}
 }
 
@@ -24,11 +40,12 @@ Quiz(fakeUI, fakeGetJSON({questions: []})).run();
 
 Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
 
-//UI(fakeDocument).render();
+UI(fakeDocument).setQuestion(fakeQuestion);
 
-//setQuestion,
-//clearQuiz
+UI(fakeDocument).clearQuiz();
 
 UI(fakeDocument).setInfoMessage('Test message');
 
 assert.strictEqual(UI(fakeDocument).whichIsChecked(), -1, 'should return -1 for no checked answers');
+
+UI(fakeDocument).render('enterElement', () => {}, () => {}, fakeQuestion);
