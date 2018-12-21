@@ -1,3 +1,5 @@
+//Custom spy to check if methods were called
+
 const assert = require('assert');
 const Quiz = require('./quiz');
 const UI = require('./ui');
@@ -7,8 +9,11 @@ function fakeGetJSON(json) {
 }
 
 const fakeUI ={
-	render() {}
+	render() {
+		fakeUI.render.calls.push(arguments);
+	}
 }
+fakeUI.render.calls = [];
 
 const fakeDocument = {
 	getElementById() {
@@ -36,7 +41,27 @@ const fakeQuestion = {
 	}
 }
 
+const tests = [];
+
+function test(name, testFn) {
+	tests.push([name, testFn]);
+}
+
+function runTests() {
+	tests.forEach(([name, fn]) => {
+		const ok = true;
+		try {
+			fn();
+		} catch (e) {
+			ok = false;
+
+		}
+	});
+}
+
 Quiz(fakeUI, fakeGetJSON({questions: []})).run();
+
+assert.ok(fakeUI.render.calls.length === 1)
 
 Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
 

@@ -1,3 +1,5 @@
+// UI grazina kai kazkas ivyksta tik, Quiz tada naudoja
+
 const Question = require('./question');
 
 
