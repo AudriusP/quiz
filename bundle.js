@@ -30,6 +30,8 @@ function Question(question, answers, correctAnswer) {
 
 module.exports = Question;
 },{}],3:[function(require,module,exports){
+// UI grazina kai kazkas ivyksta tik, Quiz tada naudoja
+
 const Question = require('./question');
 
 

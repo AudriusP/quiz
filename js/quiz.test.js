@@ -1,8 +1,8 @@
 //Custom spy to check if methods were called
 
-const assert = require('assert');
 const Quiz = require('./quiz');
 const UI = require('./ui');
+const TR = require('./tests-runner');
 
 function fakeGetJSON(json) {
 	return (url, callback) => callback(json);
@@ -10,10 +10,9 @@ function fakeGetJSON(json) {
 
 const fakeUI ={
 	render() {
-		fakeUI.render.calls.push(arguments);
+		TR().logToSpy('render');
 	}
 }
-fakeUI.render.calls = [];
 
 const fakeDocument = {
 	getElementById() {
@@ -41,36 +40,34 @@ const fakeQuestion = {
 	}
 }
 
-const tests = [];
+TR().test('Quiz.run() should work with empty JSON', () => {
+	Quiz(fakeUI, fakeGetJSON({questions: []})).run();
+	TR().assertSpy('render', 1);
+});
 
-function test(name, testFn) {
-	tests.push([name, testFn]);
-}
+TR().test('Quiz.run() should work with real JSON', () => {
+	Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
+	TR().assertSpy('render', 2);
+});
 
-function runTests() {
-	tests.forEach(([name, fn]) => {
-		const ok = true;
-		try {
-			fn();
-		} catch (e) {
-			ok = false;
+TR().test('UI.setQuestion() should work with fakeQuestion', () => {
+	UI(fakeDocument).setQuestion(fakeQuestion);
+});
 
-		}
-	});
-}
+TR().test('UI.clearQuiz() should work', () => {
+	UI(fakeDocument).clearQuiz();
+});
 
-Quiz(fakeUI, fakeGetJSON({questions: []})).run();
+TR().test('UI.setInfoMessage() should work', () => {
+	UI(fakeDocument).setInfoMessage('Test message');
+});
 
-assert.ok(fakeUI.render.calls.length === 1)
+TR().test('UI.whichIsChecked() should return -1 for no checked answers', () => {
+	assert.strictEqual(UI(fakeDocument).whichIsChecked(), -1, 'should return -1 for no checked answers');
+});
 
-Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
+TR().test('UI.render() should work', () => {
+	UI(fakeDocument).render('enterElement', () => {}, () => {}, fakeQuestion);
+});
 
-UI(fakeDocument).setQuestion(fakeQuestion);
-
-UI(fakeDocument).clearQuiz();
-
-UI(fakeDocument).setInfoMessage('Test message');
-
-assert.strictEqual(UI(fakeDocument).whichIsChecked(), -1, 'should return -1 for no checked answers');
-
-UI(fakeDocument).render('enterElement', () => {}, () => {}, fakeQuestion);
+TR().runTests();

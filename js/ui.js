@@ -1,6 +1,3 @@
-// Pabandyti užsimokinti UI
-// document.createElement -> return []?
-
 function UI(document) {
 let choicesIds = [];
 
