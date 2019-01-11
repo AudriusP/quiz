@@ -1,4 +1,9 @@
 //Custom spy to check if methods were called
+//Improve custom test runner
+//tape test runner - check insides
+//Separete UI?
+//Spy -> what params? render() -> with first q
+
 
 const assert = require('assert');
 const Quiz = require('./quiz');
@@ -40,6 +45,8 @@ const fakeQuestion = {
 		return [];
 	}
 }
+
+//Suite -> ui.test.js
 
 TR().test('Quiz.run() should work with empty JSON', () => {
 	Quiz(fakeUI, fakeGetJSON({questions: []})).run();

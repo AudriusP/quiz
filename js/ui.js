@@ -1,3 +1,9 @@
+//UI -> backend UI -> abstraction
+//Render Quiz in Console?
+//Canvas API in HTML?
+
+// React -> React Native - using same parts? Paint app? Pixel based? Saving
+
 function UI(document) {
 let choicesIds = [];
 
