@@ -7,6 +7,9 @@ function TR() {
 	}
 
 	function runTests() {
+		let passed = 0;
+		let failed = 0;
+
 		tests.forEach(([name, testFn]) => {
 			let ok = true;
 			try {
@@ -14,11 +17,16 @@ function TR() {
 			} catch (e) {
 				ok = false;
 				console.log('Failed: "' + name + '"" because of: ' + e);
+				failed++;
 			}
 			if(ok) {
 				console.log('Passed: "' + name + '"');
+				passed++;
 			}
 		});
+
+		console.log('Passed: ' + passed + ' tests');
+		console.log('Failed: ' + failed + ' tests');
 	}
 
 	function logToSpy(spyName) {

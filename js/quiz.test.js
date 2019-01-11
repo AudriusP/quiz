@@ -1,5 +1,6 @@
 //Custom spy to check if methods were called
 
+const assert = require('assert');
 const Quiz = require('./quiz');
 const UI = require('./ui');
 const TR = require('./tests-runner');
