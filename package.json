@@ -4,7 +4,7 @@
   "description": "Simple quiz with JS",
   "main": "index.js",
   "scripts": {
-    "test": "node ./js/quiz.test.js",
+    "test": "node ./js/quiz.test.js && node ./js/ui.test.js",
     "build": "browserify ./js/index.js -o ./bundle.js"
   },
   "repository": {

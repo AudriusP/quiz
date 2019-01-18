@@ -1,11 +1,4 @@
-const tests = [];
-const spies = {};
-
-function TR() {
-	function test(name, testFn) {
-		tests.push([name, testFn]);
-	}
-
+function Suite(tests) {
 	function runTests() {
 		let passed = 0;
 		let failed = 0;
@@ -28,27 +21,16 @@ function TR() {
 		console.log('Passed: ' + passed + ' tests');
 		console.log('Failed: ' + failed + ' tests');
 	}
-
-	function logToSpy(spyName) {
-		if(!spies[spyName]) {
-			spies[spyName] = 1;
-		} else {
-			spies[spyName]++;
-		}
-	}
-
-	function assertSpy(spyName, callsNumber) {
-		if(spies[spyName] !== callsNumber) {
-			throw Error(spyName + '() was not called ' + callsNumber + ', but ' + spies[spyName] + ' times!');
-		}
-	}
-
 	return {
-		test,
-		runTests,
-		logToSpy,
-		assertSpy
+		runTests
 	}
 }
 
-module.exports = TR;
+function test(name, testFn) {
+	return[name, testFn];
+}
+
+module.exports = { 
+	Suite: Suite,
+	test: test,
+};
