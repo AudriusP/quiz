@@ -1,9 +1,14 @@
-function Suite(tests) {
+function Suite(tests, beforeEach, afterEach) {
 	function runTests() {
 		let passed = 0;
 		let failed = 0;
 
 		tests.forEach(([name, testFn]) => {
+
+			if(beforeEach) {
+				beforeEach();
+			}
+
 			let ok = true;
 			try {
 				testFn();
@@ -15,6 +20,10 @@ function Suite(tests) {
 			if(ok) {
 				console.log('\x1b[32m', 'Passed: "' + name + '"');
 				passed++;
+			}
+
+			if(afterEach) {
+				afterEach();
 			}
 		});
 

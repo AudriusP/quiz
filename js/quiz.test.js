@@ -12,26 +12,28 @@ function fakeGetJSON(json) {
 	return (url, callback) => callback(json);
 }
 
-const renderSpy = new Spy();
+const spyRender = new Spy();
 
 const fakeUI ={
 	render() {
-		renderSpy.log(arguments);
+		spyRender.log(arguments);
 	}
 }
 
 TR.Suite([
 	TR.test('Quiz.run() should work with empty JSON', () => {
 		Quiz(fakeUI, fakeGetJSON({questions: []})).run();
-		renderSpy.assertCalls(1);
+		spyRender.assertCalls(1);
 	}),
 	TR.test('Quiz.run() should work with real JSON', () => {
 		Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
-		renderSpy.assertCalls(2);
+		spyRender.assertCalls(1);
 	}),
 	TR.test('Quiz.run() should pass correct parameter to UI.render()', () => {
 		Quiz(fakeUI, fakeGetJSON({questions: []})).run('app');
-		renderSpy.assertCalls(3);
-		renderSpy.assertArgument('app');
+		spyRender.assertCalls(1);
+		spyRender.assertArgument('app');
 	})
-]).runTests();
+],
+	() => { spyRender.refresh(); }
+).runTests();

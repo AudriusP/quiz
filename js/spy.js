@@ -20,6 +20,11 @@ function Spy() {
 			throw Error('Spied function was not called with value \"' + argumentValue + '\"!');
 		}
 	}
+
+	this.refresh = function () {
+		this.calls = 0;
+		this.args = [];
+	}
 }
 
 module.exports = Spy;

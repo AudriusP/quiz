@@ -50,8 +50,8 @@ TR.Suite([
 	}),
 	TR.test('UI.setQuestion() should work with fakeQuestion', () => {
 		UI(fakeDocument).setQuestion(fakeQuestion);
-		spyGetAnswers.assertCalls(2);
-		spyGetQuestion.assertCalls(2);
+		spyGetAnswers.assertCalls(1);
+		spyGetQuestion.assertCalls(1);
 	}),
 	TR.test('UI.setInfoMessage() should work', () => {
 		UI(fakeDocument).setInfoMessage('Test message');
@@ -61,6 +61,13 @@ TR.Suite([
 	}),
 	TR.test('UI.clearQuiz() should work', () => {
 		UI(fakeDocument).clearQuiz();
-		spyRemove.assertCalls(3);
+		spyRemove.assertCalls(1);
 	})
-]).runTests();
+],
+	() => {
+		spyRemove.refresh();
+		spyGetAnswers.refresh();
+		spyGetQuestion.refresh();
+		spyGetElementById.refresh();
+	}
+).runTests();
