@@ -1,8 +1,9 @@
 //Improve custom test runner
 //Suite -> ui.test.js
 //tape test runner - check insides
-//Separete UI?
 //Spy -> what params? render() -> with first q
+//Separete UI?
+//node script to run *.test.js
 
 const Quiz = require('./quiz');
 const TR = require('./tests-runner');

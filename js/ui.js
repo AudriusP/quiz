@@ -1,13 +1,24 @@
-//UI -> backend UI -> abstraction
+//UI -> backend UI -> abstraction (not to DOM)
 //Render Quiz in Console?
 //Canvas API in HTML?
-
+//Tests - helps or not?
 // React -> React Native - using same parts? Paint app? Pixel based? Saving
 
 function UI(document) {
 let choicesIds = [];
 
 function render(enterElementId, next, back, Question, userAnswer) {
+/*
+  uibackend.clear();
+  uibackend.addContainer(
+    uibackend.row(Question.title()),
+    ...Question.getAnwsers().map(answer => uibackend.row(answer)),
+  );
+
+  uibackend.draw([
+    Question.title,
+  ])
+*/
   clearQuiz();
   clearInfoMessage();
 
