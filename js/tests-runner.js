@@ -9,17 +9,20 @@ function Suite(tests) {
 				testFn();
 			} catch (e) {
 				ok = false;
-				console.log('Failed: "' + name + '"" because of: ' + e);
+				console.log('\x1b[31m', 'Failed: "' + name + '"" because of: ' + e);
 				failed++;
 			}
 			if(ok) {
-				console.log('Passed: "' + name + '"');
+				console.log('\x1b[32m', 'Passed: "' + name + '"');
 				passed++;
 			}
 		});
 
-		console.log('Passed: ' + passed + ' tests');
-		console.log('Failed: ' + failed + ' tests');
+		console.log('\x1b[32m', 'Passed: ' + passed + ' tests');
+		if(failed > 0) {
+			console.log('\x1b[31m', 'Failed: ' + failed + ' tests');
+		}
+		console.log('\x1b[0m');
 	}
 	return {
 		runTests
