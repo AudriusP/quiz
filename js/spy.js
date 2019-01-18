@@ -1,5 +1,5 @@
 function Spy(){
-	this.calls = 0;
+	calls = 0;
 
 	function logCall() {
 		calls++;

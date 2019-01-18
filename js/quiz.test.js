@@ -6,7 +6,7 @@
 
 const Quiz = require('./quiz');
 const TR = require('./tests-runner');
-const Spy = require('./spies');
+const Spy = require('./spy');
 
 function fakeGetJSON(json) {
 	return (url, callback) => callback(json);
