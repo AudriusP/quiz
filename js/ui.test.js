@@ -44,7 +44,7 @@ TR.Suite([
 	TR.test('UI.render() should work', () => {
 		UI(fakeDocument).render('enterElement', () => {}, () => {}, fakeQuestion);
 		spyRemove.assertCalls(2);
-		spyGetElementById.assertArgument(0, 'enterElement');
+		spyGetElementById.assertArgument('enterElement');
 		spyGetAnswers.assertCalls(1);
 		spyGetQuestion.assertCalls(1);
 	}),

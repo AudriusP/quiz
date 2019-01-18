@@ -5,9 +5,7 @@ function Spy() {
 	this.log = function (args) {
 		this.calls++;
 		if(args) {
-			this.args = Array.from(args);
-		} else {
-			this.args = [];
+			this.args = this.args.concat(Array.from(args));
 		}
 	}
 
@@ -17,10 +15,9 @@ function Spy() {
 		}
 	}
 
-	this.assertArgument = function (argIndex, argumentValue) {
-		if(this.args[argIndex] !== argumentValue) {
-			throw Error('Spied function was not called with value \"' + argumentValue + '\" as ' + argIndex + ' argument!\n' +
-				'But instead with value \"' + this.args[argIndex] + '\"...');
+	this.assertArgument = function (argumentValue) {
+		if(this.args.indexOf(argumentValue) === -1) {
+			throw Error('Spied function was not called with value \"' + argumentValue + '\"!');
 		}
 	}
 }

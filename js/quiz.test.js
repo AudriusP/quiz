@@ -32,6 +32,6 @@ TR.Suite([
 	TR.test('Quiz.run() should pass correct parameter to UI.render()', () => {
 		Quiz(fakeUI, fakeGetJSON({questions: []})).run('app');
 		renderSpy.assertCalls(3);
-		renderSpy.assertArgument(0, 'app');
+		renderSpy.assertArgument('app');
 	})
 ]).runTests();
