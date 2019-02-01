@@ -1,5 +1,3 @@
-// UI grazina kai kazkas ivyksta tik, Quiz tada naudoja
-
 const Question = require('./question');
 
 
@@ -7,16 +5,14 @@ function Quiz(UI, getJSON) {
   let questions = [];
   let currentQuestion = 0;
   let userAnswers = [];
-  let _enterElementId;
 
-  function run(enterElementId) {
-    _enterElementId = enterElementId;
+  function run() {
 
     getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
-      UI.render(_enterElementId, next, back, questions[0]);
+      UI.render(next, back, questions[0]);
     });
   }
 
@@ -54,7 +50,7 @@ function Quiz(UI, getJSON) {
 
   function nextQuestion() {
     currentQuestion++;
-    UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+    UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
 }
 
@@ -64,7 +60,7 @@ function notFirstQuestion() {
 
 function previousQuestion() {
   currentQuestion--;
-  UI.render(_enterElementId, next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
   //UI.setInfoMessage('');
 }
