@@ -1,34 +1,14 @@
 const assert = require('assert');
 const UI = require('./ui');
+const UIBackend = require('./ui-backend');
 const TR = require('./tests-runner');
 const Spy = require('./spy.js');
 
 const spyRemove = new Spy();
 const spyGetAnswers = new Spy();
 const spyGetQuestion = new Spy();
-const spyGetElementById = new Spy();
-
-const fakeDocument = {
-	getElementById() {
-		spyGetElementById.log(arguments);
-		return fakeElement;
-	},
-	getElementsByTagName() {
-		return [fakeElement];
-	},
-	createElement() {
-		return fakeElement;
-	},
-	createTextNode() {}
-}
-
-const fakeElement = {
-	appendChild() {},
-	remove() {
-		spyRemove.log();
-	},
-	parentNode: fakeDocument
-}
+const spyFakeRenderer = new Spy();
+const spySetInfoMessage = new Spy();
 
 const fakeQuestion = {
 	getQuestion() {
@@ -40,34 +20,56 @@ const fakeQuestion = {
 	}
 }
 
+function fakeRenderer() {
+	spyFakeRenderer.log(arguments);
+	function addContainer(){}
+	function addText(){}
+	function createChoice(){}
+	function createButton(){}
+	function clear(){
+		spyRemove.log();
+	}
+	function whichIsChecked(){
+		return -1;
+	}
+	function setInfoMessage(){
+		spySetInfoMessage.log(arguments);
+	}
+	return {
+		addContainer,
+		addText,
+		createChoice,
+		createButton,
+		clear,
+		whichIsChecked,
+		setInfoMessage
+	}
+}
+
 TR.Suite([
-	TR.test('UI.render() should work', () => {
-		UI(fakeDocument).render('enterElement', () => {}, () => {}, fakeQuestion);
-		spyRemove.assertCalls(2);
-		spyGetElementById.assertArgument('enterElement');
+	TR.test('UI(rnderer(parameter)).render() should be called with parameter', () => {
+		UI(fakeRenderer('app')).render(() => {}, () => {}, fakeQuestion);
+		spyRemove.assertCalls(1);
+		spyFakeRenderer.assertArgument('app');
 		spyGetAnswers.assertCalls(1);
 		spyGetQuestion.assertCalls(1);
 	}),
-	TR.test('UI.setQuestion() should work with fakeQuestion', () => {
-		UI(fakeDocument).setQuestion(fakeQuestion);
-		spyGetAnswers.assertCalls(1);
-		spyGetQuestion.assertCalls(1);
-	}),
-	TR.test('UI.setInfoMessage() should work', () => {
-		UI(fakeDocument).setInfoMessage('Test message');
+	TR.test('UI.setInfoMessage(message) should be called with message', () => {
+		UI(fakeRenderer()).setInfoMessage('Test message');
+		spySetInfoMessage.assertArgument('Test message');
 	}),
 	TR.test('UI.whichIsChecked() should return -1 for no checked answers', () => {
-		assert.strictEqual(UI(fakeDocument).whichIsChecked(), -1, 'should return -1 for no checked answers');
+		assert.strictEqual(UI(fakeRenderer()).whichIsChecked(), -1, 'should return -1 for no checked answers');
 	}),
 	TR.test('UI.clearQuiz() should work', () => {
-		UI(fakeDocument).clearQuiz();
+		UI(fakeRenderer()).clearQuiz();
 		spyRemove.assertCalls(1);
 	})
-],
+	],
 	() => {
 		spyRemove.refresh();
 		spyGetAnswers.refresh();
 		spyGetQuestion.refresh();
-		spyGetElementById.refresh();
+		spySetInfoMessage.refresh();
 	}
-).runTests();
+	).runTests();

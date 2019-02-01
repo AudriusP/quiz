@@ -45,11 +45,6 @@ TR.Suite([
 	TR.test('Quiz.run() should work with real JSON', () => {
 		Quiz(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
 		spyRender.assertCalls(1);
-	}),
-	TR.test('Quiz.run() should pass correct parameter to UI.render()', () => {
-		Quiz(fakeUI, fakeGetJSON({questions: []})).run('app');
-		spyRender.assertCalls(1);
-		spyRender.assertArgument('app');
 	})
 ],
 	() => { spyRender.refresh(); }
