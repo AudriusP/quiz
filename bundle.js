@@ -1,4 +1,154 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+function Canvas(enterElementId) {
+	const choicesIds = [];
+
+	function addContainer(elements) {
+		const enterElement = getEl(enterElementId);
+
+		for (let i = 0; i < elements.length; i++) {
+			enterElement.appendChild(elements[i]);
+		}
+	}
+
+	function addText(text) {
+		const canvas = create('canvas', {id: 'text', height: 25, style: 'display:block'}, []);
+		const ctx = canvas.getContext('2d');
+		ctx.font = '15px Arial';
+		ctx.fillText(text, 10, 15);
+		return canvas;
+	}
+
+	function createChoice(text, userAnswer) {
+		let isChecked = false;
+
+		if(userAnswer === choicesIds.length) {
+			isChecked = true;
+		}
+		
+		choicesIds.push(text);
+		return createChoiceContainer(text, isChecked);
+	}
+
+	function createButton(text, fnc) {
+		const button = create('canvas', {id: 'button', width: 150, height: 20, onclick: fnc}, []);
+
+		var ctx = button.getContext('2d');
+		ctx.rect(0, 0, 150, 20);
+		ctx.stroke();
+
+		ctx.font = '15px Arial';
+		ctx.fillText(text, 10, 15);
+		return button;
+	}
+
+	function clear() {
+		clearQuiz();
+		clearInfoMessage();
+		choicesIds.length = 0;
+	}
+
+	function whichIsChecked() {
+		for (let i = 0; i < choicesIds.length; i++) {
+			if (getEl(choicesIds[i]).checked) {
+				setInfoMessage('');
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	function setInfoMessage(text) {
+		clearInfoMessage();
+		const canvas = create('canvas', {id: 'infoMessage', height: 25, style: 'display:block'}, []);
+		const ctx = canvas.getContext('2d');
+		ctx.font = '15px Arial';
+		ctx.fillText(text, 10, 15);
+
+		getEl(enterElementId).appendChild(canvas);
+	}
+
+	function createChoiceContainer(text, isChecked) {
+		const choice = create('canvas', {id: text, height: 25, style: 'display:block', onclick: () => {checkChoice(text)}}, []);
+		choice.setAttribute('data-checked', isChecked);
+		const ctx = choice.getContext('2d');
+
+		ctx.beginPath();
+		ctx.arc(10, 10, 5, 0, 2 * Math.PI);
+		ctx.stroke();
+
+		ctx.font = '15px Arial';
+		ctx.fillText(text, 20, 15);
+		return choice;
+	}
+
+	function checkChoice(text) {
+		for (let i = 0; i < choicesIds.length; i++) {
+			const choice = getEl(choicesIds[i]);
+			const ctx = choice.getContext('2d');
+			ctx.lineWidth = '2';
+			ctx.strokeStyle = 'white';
+			ctx.beginPath();
+			ctx.arc(10, 10, 2, 0, 2 * Math.PI);
+			ctx.stroke();
+			choice.setAttribute('data-checked', false);
+		}
+
+		const choice = getEl(text);
+		const ctx = choice.getContext('2d');
+		ctx.lineWidth = '1';
+		ctx.strokeStyle = 'black';
+		ctx.beginPath();
+		ctx.arc(10, 10, 2, 0, 2 * Math.PI);
+		ctx.stroke();
+		choice.setAttribute('data-checked', true);
+	}
+
+	return {
+		addContainer,
+		addText,
+		createChoice,
+		createButton,
+		clear,
+		whichIsChecked,
+		setInfoMessage
+	}
+}
+
+function clearQuiz() {
+	if(getEl('quiz')) {
+		getEl('quiz').remove();
+	}
+}
+
+function clearInfoMessage() {
+	if(getEl('infoMessage')) {
+		getEl('infoMessage').remove();
+	}
+}
+
+function create(elementType, attributes, children) {
+	const element = document.createElement(elementType);
+
+	for(let key in attributes) {
+		element[key] = attributes[key];
+	}
+
+	if(children) {
+		for(let i = 0; i < children.length; i++) {
+			element.appendChild(children[i]);
+		}
+	}
+
+	return element;
+}
+
+function getEl(elementId) {
+	return document.getElementById(elementId);
+}
+
+module.exports = Canvas;
+
+},{}],2:[function(require,module,exports){
 function HTML(enterElementId) {
 	const choicesIds = [];
 
@@ -136,13 +286,14 @@ function getEl(elementId) {
 
 module.exports = HTML;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 const Quiz = require('./quiz');
 const UI = require('./ui');
-const HTML = require('./html')
+const HTML = require('./html');
+const Canvas = require('./canvas');
 
-Quiz(UI(HTML('app')), $.getJSON).run();
-},{"./html":1,"./quiz":4,"./ui":6}],3:[function(require,module,exports){
+Quiz(UI(Canvas('app')), $.getJSON).run();
+},{"./canvas":1,"./html":2,"./quiz":5,"./ui":7}],4:[function(require,module,exports){
 function Question(question, answers, correctAnswer) {
   const _question = question;
   const _answers = answers;
@@ -168,7 +319,7 @@ function Question(question, answers, correctAnswer) {
 };
 
 module.exports = Question;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 const Question = require('./question');
 
 
@@ -259,7 +410,7 @@ return {
 
 module.exports = Quiz;
 
-},{"./question":3}],5:[function(require,module,exports){
+},{"./question":4}],6:[function(require,module,exports){
 function UIBackend(renderer) {
 	function addContainer(elements) {
 		renderer.addContainer(elements);
@@ -301,7 +452,7 @@ function UIBackend(renderer) {
 }
 
 module.exports = UIBackend;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 //UI -> backend UI -> abstraction (not to DOM)
 //Render Quiz in Console?
 //Canvas API in HTML?
@@ -345,4 +496,4 @@ function UI(renderer) {
 
 module.exports = UI;
 
-},{"./ui-backend":5}]},{},[2]);
+},{"./ui-backend":6}]},{},[3]);
