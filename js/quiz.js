@@ -1,13 +1,14 @@
 const Question = require('./question');
 
+function QuizApp(UI, getJSON) {
 
-function Quiz(UI, getJSON) {
+  // replace all these, with model object from 'model.js', 
+  // all mutations should happen inside model.
   let questions = [];
   let currentQuestion = 0;
   let userAnswers = [];
 
   function run() {
-
     getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
@@ -51,39 +52,36 @@ function Quiz(UI, getJSON) {
   function nextQuestion() {
     currentQuestion++;
     UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-}
-
-function notFirstQuestion() {
-  return currentQuestion !== 0;
-}
-
-function previousQuestion() {
-  currentQuestion--;
-  UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setInfoMessage('');
-}
-
-function getCorrectAnswersCount() {
-  let correctAnswers = 0;
-
-  for(let i = 0; i < userAnswers.length; i++) {
-    if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
-      correctAnswers++;
-    }
   }
-  return correctAnswers;
+
+  function notFirstQuestion() {
+    return currentQuestion !== 0;
+  }
+
+  function previousQuestion() {
+    currentQuestion--;
+    UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+  }
+
+  function getCorrectAnswersCount() {
+    let correctAnswers = 0;
+
+    for(let i = 0; i < userAnswers.length; i++) {
+      if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
+        correctAnswers++;
+      }
+    }
+    return correctAnswers;
+  }
+
+  function finish() {
+    UI.clearQuiz();
+    UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
+  }
+
+  return {
+    run
+  }
 }
 
-function finish() {
-  UI.clearQuiz();
-  UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
-}
-
-return {
-  run
-}
-}
-
-module.exports = Quiz;
+module.exports = QuizApp;

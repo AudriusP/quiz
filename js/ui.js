@@ -2,6 +2,7 @@
 //Render Quiz in Console?
 //Canvas API in HTML?
 //Tests - helps or not?
+//Pure Function - read
 //React -> React Native - using same parts? Paint app? Pixel based? Saving
 const UIBackend = require('./ui-backend');
 
@@ -18,11 +19,11 @@ function UI(renderer) {
       UIBackend(renderer).createButton('Next question', next),
       ]);
   }
-
+// Quiz should save info about chosen things
   function whichIsChecked() {
     return UIBackend(renderer).whichIsChecked();
   }
-
+// Too specific
   function setInfoMessage(text) {
     UIBackend(renderer).setInfoMessage(text)
   }

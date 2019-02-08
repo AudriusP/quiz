@@ -4,6 +4,7 @@ const UIBackend = require('./ui-backend');
 const TR = require('./tests-runner');
 const Spy = require('./spy.js');
 
+// createSpyObj (Jasmine)
 const spyRemove = new Spy();
 const spyGetAnswers = new Spy();
 const spyGetQuestion = new Spy();
@@ -86,3 +87,44 @@ TR.Suite([
 		spyRemove.refresh();
 	}
 	).runTests();
+
+
+/*
+model = Quiz(...);
+
+model.onChange(() => UI.render(model));
+
+q = model.getCurrentQuestion();
+
+backend.render({
+	row: q.getAnswers().map((answer, i) => 
+		({choice: answer, selected: currentAnswer === i, onClick: () => model.answerCurrentQuestion(i)}))
+})
+*/
+
+/*
+describe('Quiz', () => {
+	it('should render question, choices, and navigation buttons', () => {
+		API = fakeAPI().returns({
+			questions: [
+			   question: 'Question',
+			   answers: ['Answer 1', 'Answer 2'],
+			   correctAnswerIndex: 0,
+			]
+		})
+		backend = fakeHtmlBackend();
+		Quick(UI(backend), API).run();
+		expect(backend.render).wasCalledWith({
+			rows: [
+				{text: 'Question'},
+				{rows: [
+					{choice: 'Answer 1', selected: false, onClick: () => {}},
+					{choice: 'Answer 2', selected: false, onClick: () => {}}
+				]}
+			]
+		});
+	});
+});
+*/
+
+

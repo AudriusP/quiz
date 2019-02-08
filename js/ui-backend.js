@@ -6,7 +6,8 @@ function UIBackend(renderer) {
 	function createText(text) {
 		return renderer.addText(text);
 	}
-
+// userAnswer -> isChecked?
+// Callback on select?
 	function createChoice(text, userAnswer) {
 		return renderer.createChoice(text, userAnswer);
 	}

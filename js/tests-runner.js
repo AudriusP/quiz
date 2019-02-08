@@ -1,9 +1,10 @@
-function Suite(tests, beforeEach, afterEach) {
+function Suite(suiteName, tests, beforeEach, afterEach) {
 	function runTests() {
 		let passed = 0;
 		let failed = 0;
 
-		tests.forEach(([name, testFn]) => {
+		tests.forEach(([testName, testFn]) => {
+			const name = suiteName + ' ' + testName;
 
 			if(beforeEach) {
 				beforeEach();

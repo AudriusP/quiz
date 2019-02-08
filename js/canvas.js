@@ -1,3 +1,5 @@
+//One Canvas
+
 function Canvas(enterElementId) {
 	const choicesIds = [];
 

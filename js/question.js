@@ -15,10 +15,15 @@ function Question(question, answers, correctAnswer) {
     return _correctAnswer;
   }
 
+  function getCorrectAnswer() {
+    return _answers[_correctAnswer];
+  }
+
   return {
     getQuestion: getQuestion,
     getAnswers: getAnswers,
-    getCorrectAnswerId: getCorrectAnswerId
+    getCorrectAnswerId: getCorrectAnswerId,
+    getCorrectAnswer
   }
 };
 
