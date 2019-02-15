@@ -276,9 +276,13 @@ function QuizApp(UI, getJSON) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
-      UI.render(next, back, onChangeCallback, questions[0]);
+      rerender();
     });
   }
+
+function rerender(message) {
+  UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion), message);
+}
 
   function next() {
     if (userAnswers[currentQuestion]) {
@@ -290,7 +294,7 @@ function QuizApp(UI, getJSON) {
       }
     }
     else {
-      UI.renderText('Choose answer!');
+      rerender('Choose answer!');
     }
   }
 
@@ -299,7 +303,7 @@ function QuizApp(UI, getJSON) {
       previousQuestion();
     }
     else {
-      UI.renderText('This is first question!');
+      rerender('This is first question!');
     }
   }
 
@@ -313,7 +317,7 @@ function QuizApp(UI, getJSON) {
 
   function nextQuestion() {
     currentQuestion++;
-    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
+    rerender();
   }
 
   function notFirstQuestion() {
@@ -322,7 +326,7 @@ function QuizApp(UI, getJSON) {
 
   function previousQuestion() {
     currentQuestion--;
-    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
+    rerender();
   }
 
   function getCorrectAnswersCount() {
@@ -341,8 +345,7 @@ function QuizApp(UI, getJSON) {
   }
 
   function finish() {
-    UI.clearQuiz();
-    UI.renderText('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
+    rerender('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
   }
 
   return {
@@ -396,7 +399,7 @@ const UIBackend = require('./ui-backend');
 
 function UI(renderer) {
 
-  function render(next, back, onChangeCallback, Question, userAnswer) {
+  function render(next, back, onChangeCallback, Question, userAnswer, message = '') {
     UIBackend(renderer).clear();
     UIBackend(renderer).addContainer([
       UIBackend(renderer).createText(Question.getQuestion()),
@@ -404,22 +407,13 @@ function UI(renderer) {
       UIBackend(renderer).createButton('Previous question', back),
       UIBackend(renderer).createButton('Next question', next),
       ]);
-  }
-
-  function renderText(text) {
     UIBackend(renderer).addContainer([
-      UIBackend(renderer).createText(text),
+      UIBackend(renderer).createText(message),
     ]);
   }
 
-  function clearQuiz() {
-    UIBackend(renderer).clear();
-  }
-
   return {
-    render,
-    renderText,
-    clearQuiz
+    render
   }
 }
 

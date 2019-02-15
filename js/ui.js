@@ -9,7 +9,7 @@ const UIBackend = require('./ui-backend');
 
 function UI(renderer) {
 
-  function render(next, back, onChangeCallback, Question, userAnswer) {
+  function render(next, back, onChangeCallback, Question, userAnswer, message = '') {
     UIBackend(renderer).clear();
     UIBackend(renderer).addContainer([
       UIBackend(renderer).createText(Question.getQuestion()),
@@ -17,22 +17,13 @@ function UI(renderer) {
       UIBackend(renderer).createButton('Previous question', back),
       UIBackend(renderer).createButton('Next question', next),
       ]);
-  }
-
-  function renderText(text) {
     UIBackend(renderer).addContainer([
-      UIBackend(renderer).createText(text),
+      UIBackend(renderer).createText(message),
     ]);
   }
 
-  function clearQuiz() {
-    UIBackend(renderer).clear();
-  }
-
   return {
-    render,
-    renderText,
-    clearQuiz
+    render
   }
 }
 
