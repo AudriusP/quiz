@@ -13,13 +13,12 @@ function QuizApp(UI, getJSON) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
-      UI.render(next, back, questions[0]);
+      UI.render(next, back, onChangeCallback, questions[0]);
     });
   }
 
   function next() {
-    if (UI.whichIsChecked() != -1) {
-      recordUserAnswer();
+    if (userAnswers[currentQuestion]) {
       if (notLastQuestion()) {
         nextQuestion();
       }
@@ -28,7 +27,7 @@ function QuizApp(UI, getJSON) {
       }
     }
     else {
-      UI.setInfoMessage('Choose answer!');
+      UI.renderText('Choose answer!');
     }
   }
 
@@ -37,12 +36,12 @@ function QuizApp(UI, getJSON) {
       previousQuestion();
     }
     else {
-      UI.setInfoMessage('This is first question!');
+      UI.renderText('This is first question!');
     }
   }
 
-  function recordUserAnswer() {
-    userAnswers[currentQuestion] = UI.whichIsChecked();
+  function onChangeCallback(id) {
+    userAnswers[currentQuestion] = id;
   }
 
   function notLastQuestion() {
@@ -51,7 +50,7 @@ function QuizApp(UI, getJSON) {
 
   function nextQuestion() {
     currentQuestion++;
-    UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
   }
 
   function notFirstQuestion() {
@@ -60,7 +59,7 @@ function QuizApp(UI, getJSON) {
 
   function previousQuestion() {
     currentQuestion--;
-    UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
+    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
   }
 
   function getCorrectAnswersCount() {
@@ -74,9 +73,13 @@ function QuizApp(UI, getJSON) {
     return correctAnswers;
   }
 
+  function getUserAnswerId(questionId) {
+    return questions[questionId].getAnswers().indexOf(userAnswers[questionId])
+  }
+
   function finish() {
     UI.clearQuiz();
-    UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
+    UI.renderText('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
   }
 
   return {

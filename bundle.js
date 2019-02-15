@@ -1,4 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+//One Canvas
+
 function Canvas(enterElementId) {
 	const choicesIds = [];
 
@@ -150,11 +152,10 @@ module.exports = Canvas;
 
 },{}],2:[function(require,module,exports){
 function HTML(enterElementId) {
-	const choicesIds = [];
 
 	function addContainer(elements) {
 		const enterElement = getEl(enterElementId);
-		const element = create('div', {id: 'quiz'}, []);
+		const element = create('div', {}, []);
 		enterElement.appendChild(element);
 
 		for (let i = 0; i < elements.length; i++) {
@@ -163,18 +164,11 @@ function HTML(enterElementId) {
 	}
 
 	function addText(text) {
-		return create('div', {}, [createText(text)]);
+		return create('p', {}, [createText(text)]);
 	}
 
-	function createChoice(text, userAnswer) {
-		let isChecked = false;
-
-		if(userAnswer === choicesIds.length) {
-			isChecked = true;
-		}
-		
-		choicesIds.push(text);
-		return createChoiceContainer(text, isChecked);
+	function createChoice(text, index, userAnswer, onChangeCallback) {
+		return createChoiceContainer(text, userAnswer === index, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -182,24 +176,7 @@ function HTML(enterElementId) {
 	}
 
 	function clear() {
-		clearQuiz();
-		clearInfoMessage();
-		choicesIds.length = 0;
-	}
-
-	function whichIsChecked() {
-		for (let i = 0; i < choicesIds.length; i++) {
-			if (getEl(choicesIds[i]).checked) {
-				setInfoMessage('');
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	function setInfoMessage(text) {
-		clearInfoMessage();
-		getEl(enterElementId).appendChild(create('div', {id: 'infoMessage'}, [createText(text)]));
+		document.getElementById(enterElementId).innerHTML = '';
 	}
 
 	return{
@@ -207,57 +184,16 @@ function HTML(enterElementId) {
 		addText,
 		createChoice,
 		createButton,
-		clear,
-		whichIsChecked,
-		setInfoMessage
+		clear
 	}
 }
-/*
-function createChoices(choicesNumber) {
-	const choicesContainer = create('p');
-	choicesIds = [];
-	for (let i = 0; i < choicesNumber; i++) {
-		choicesIds.push('choice' + i);
-		choicesContainer.appendChild(createChoiceContainer(choicesIds[i]));
-	}
-	return choicesContainer;
-}
-*/
-function createChoiceContainer(text, isChecked) {
+
+
+function createChoiceContainer(text, isChecked, onChangeCallback) {
 	return create('p', {}, [
-		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked}),
+		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
 		create('label', {htmlFor: text}, [createText(text)])
 		]);
-}
-/*
-function setQuestion(Question, userAnswer) {
-	document.getElementById('questionContainer').innerHTML = Question.getQuestion();
-	setAnswers(Question.getAnswers(), userAnswer);
-}
-
-function setAnswers(answers, userAnswer) {
-	for (let i = 0; i < choicesIds.length; i++) {
-		getEl(choicesIds[i]).parentNode.getElementsByTagName('label')[0].innerHTML = answers[i];
-		if (userAnswer !== undefined) {
-			getEl(choicesIds[userAnswer]).checked = true;
-		}
-		else {
-			getEl(choicesIds[i]).checked = false;
-		}
-	}
-}
-*/
-
-function clearQuiz() {
-	if(getEl('quiz')) {
-		getEl('quiz').remove();
-	}
-}
-
-function clearInfoMessage() {
-	if(getEl('infoMessage')) {
-		getEl('infoMessage').remove();
-	}
 }
 
 function create(elementType, attributes, children) {
@@ -292,7 +228,7 @@ const UI = require('./ui');
 const HTML = require('./html');
 const Canvas = require('./canvas');
 
-Quiz(UI(Canvas('app')), $.getJSON).run();
+Quiz(UI(HTML('app')), $.getJSON).run();
 },{"./canvas":1,"./html":2,"./quiz":5,"./ui":7}],4:[function(require,module,exports){
 function Question(question, answers, correctAnswer) {
   const _question = question;
@@ -311,10 +247,15 @@ function Question(question, answers, correctAnswer) {
     return _correctAnswer;
   }
 
+  function getCorrectAnswer() {
+    return _answers[_correctAnswer];
+  }
+
   return {
     getQuestion: getQuestion,
     getAnswers: getAnswers,
-    getCorrectAnswerId: getCorrectAnswerId
+    getCorrectAnswerId: getCorrectAnswerId,
+    getCorrectAnswer
   }
 };
 
@@ -322,25 +263,25 @@ module.exports = Question;
 },{}],5:[function(require,module,exports){
 const Question = require('./question');
 
+function QuizApp(UI, getJSON) {
 
-function Quiz(UI, getJSON) {
+  // replace all these, with model object from 'model.js', 
+  // all mutations should happen inside model.
   let questions = [];
   let currentQuestion = 0;
   let userAnswers = [];
 
   function run() {
-
     getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
-      UI.render(next, back, questions[0]);
+      UI.render(next, back, onChangeCallback, questions[0]);
     });
   }
 
   function next() {
-    if (UI.whichIsChecked() != -1) {
-      recordUserAnswer();
+    if (userAnswers[currentQuestion]) {
       if (notLastQuestion()) {
         nextQuestion();
       }
@@ -349,7 +290,7 @@ function Quiz(UI, getJSON) {
       }
     }
     else {
-      UI.setInfoMessage('Choose answer!');
+      UI.renderText('Choose answer!');
     }
   }
 
@@ -358,12 +299,12 @@ function Quiz(UI, getJSON) {
       previousQuestion();
     }
     else {
-      UI.setInfoMessage('This is first question!');
+      UI.renderText('This is first question!');
     }
   }
 
-  function recordUserAnswer() {
-    userAnswers[currentQuestion] = UI.whichIsChecked();
+  function onChangeCallback(id) {
+    userAnswers[currentQuestion] = id;
   }
 
   function notLastQuestion() {
@@ -372,43 +313,44 @@ function Quiz(UI, getJSON) {
 
   function nextQuestion() {
     currentQuestion++;
-    UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-}
-
-function notFirstQuestion() {
-  return currentQuestion !== 0;
-}
-
-function previousQuestion() {
-  currentQuestion--;
-  UI.render(next, back, questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setQuestion(questions[currentQuestion], userAnswers[currentQuestion]);
-  //UI.setInfoMessage('');
-}
-
-function getCorrectAnswersCount() {
-  let correctAnswers = 0;
-
-  for(let i = 0; i < userAnswers.length; i++) {
-    if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
-      correctAnswers++;
-    }
+    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
   }
-  return correctAnswers;
+
+  function notFirstQuestion() {
+    return currentQuestion !== 0;
+  }
+
+  function previousQuestion() {
+    currentQuestion--;
+    UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion));
+  }
+
+  function getCorrectAnswersCount() {
+    let correctAnswers = 0;
+
+    for(let i = 0; i < userAnswers.length; i++) {
+      if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
+        correctAnswers++;
+      }
+    }
+    return correctAnswers;
+  }
+
+  function getUserAnswerId(questionId) {
+    return questions[questionId].getAnswers().indexOf(userAnswers[questionId])
+  }
+
+  function finish() {
+    UI.clearQuiz();
+    UI.renderText('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
+  }
+
+  return {
+    run
+  }
 }
 
-function finish() {
-  UI.clearQuiz();
-  UI.setInfoMessage('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
-}
-
-return {
-  run
-}
-}
-
-module.exports = Quiz;
+module.exports = QuizApp;
 
 },{"./question":4}],6:[function(require,module,exports){
 function UIBackend(renderer) {
@@ -420,8 +362,8 @@ function UIBackend(renderer) {
 		return renderer.addText(text);
 	}
 
-	function createChoice(text, userAnswer) {
-		return renderer.createChoice(text, userAnswer);
+	function createChoice(text, index, userAnswer, onChangeCallback) {
+		return renderer.createChoice(text, index, userAnswer, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -432,22 +374,12 @@ function UIBackend(renderer) {
 		renderer.clear();
 	}
 
-	function whichIsChecked() {
-		return renderer.whichIsChecked();
-	}
-
-	function setInfoMessage(text) {
-		renderer.setInfoMessage(text);
-	}
-
 	return {
 		addContainer,
 		createText,
 		createChoice,
 		createButton,
-		clear,
-		whichIsChecked,
-		setInfoMessage
+		clear
 	}
 }
 
@@ -457,29 +389,27 @@ module.exports = UIBackend;
 //Render Quiz in Console?
 //Canvas API in HTML?
 //Tests - helps or not?
+//Pure Function - read
 //React -> React Native - using same parts? Paint app? Pixel based? Saving
 const UIBackend = require('./ui-backend');
 
 
 function UI(renderer) {
 
-  function render(next, back, Question, userAnswer) {
-
+  function render(next, back, onChangeCallback, Question, userAnswer) {
     UIBackend(renderer).clear();
     UIBackend(renderer).addContainer([
       UIBackend(renderer).createText(Question.getQuestion()),
-      ...Question.getAnswers().map(answer => UIBackend(renderer).createChoice(answer, userAnswer)),
+      ...Question.getAnswers().map((answer, index) => UIBackend(renderer).createChoice(answer, index, userAnswer, onChangeCallback)),
       UIBackend(renderer).createButton('Previous question', back),
       UIBackend(renderer).createButton('Next question', next),
       ]);
   }
 
-  function whichIsChecked() {
-    return UIBackend(renderer).whichIsChecked();
-  }
-
-  function setInfoMessage(text) {
-    UIBackend(renderer).setInfoMessage(text)
+  function renderText(text) {
+    UIBackend(renderer).addContainer([
+      UIBackend(renderer).createText(text),
+    ]);
   }
 
   function clearQuiz() {
@@ -488,8 +418,7 @@ function UI(renderer) {
 
   return {
     render,
-    whichIsChecked,
-    setInfoMessage,
+    renderText,
     clearQuiz
   }
 }

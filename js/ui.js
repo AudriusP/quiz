@@ -9,23 +9,20 @@ const UIBackend = require('./ui-backend');
 
 function UI(renderer) {
 
-  function render(next, back, Question, userAnswer) {
-
+  function render(next, back, onChangeCallback, Question, userAnswer) {
     UIBackend(renderer).clear();
     UIBackend(renderer).addContainer([
       UIBackend(renderer).createText(Question.getQuestion()),
-      ...Question.getAnswers().map(answer => UIBackend(renderer).createChoice(answer, userAnswer)),
+      ...Question.getAnswers().map((answer, index) => UIBackend(renderer).createChoice(answer, index, userAnswer, onChangeCallback)),
       UIBackend(renderer).createButton('Previous question', back),
       UIBackend(renderer).createButton('Next question', next),
       ]);
   }
-// Quiz should save info about chosen things
-  function whichIsChecked() {
-    return UIBackend(renderer).whichIsChecked();
-  }
-// Too specific
-  function setInfoMessage(text) {
-    UIBackend(renderer).setInfoMessage(text)
+
+  function renderText(text) {
+    UIBackend(renderer).addContainer([
+      UIBackend(renderer).createText(text),
+    ]);
   }
 
   function clearQuiz() {
@@ -34,8 +31,7 @@ function UI(renderer) {
 
   return {
     render,
-    whichIsChecked,
-    setInfoMessage,
+    renderText,
     clearQuiz
   }
 }

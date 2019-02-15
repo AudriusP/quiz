@@ -1,9 +1,8 @@
 function HTML(enterElementId) {
-	const choicesIds = [];
 
 	function addContainer(elements) {
 		const enterElement = getEl(enterElementId);
-		const element = create('div', {id: 'quiz'}, []);
+		const element = create('div', {}, []);
 		enterElement.appendChild(element);
 
 		for (let i = 0; i < elements.length; i++) {
@@ -12,18 +11,11 @@ function HTML(enterElementId) {
 	}
 
 	function addText(text) {
-		return create('div', {}, [createText(text)]);
+		return create('p', {}, [createText(text)]);
 	}
 
-	function createChoice(text, userAnswer) {
-		let isChecked = false;
-
-		if(userAnswer === choicesIds.length) {
-			isChecked = true;
-		}
-		
-		choicesIds.push(text);
-		return createChoiceContainer(text, isChecked);
+	function createChoice(text, index, userAnswer, onChangeCallback) {
+		return createChoiceContainer(text, userAnswer === index, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -31,24 +23,7 @@ function HTML(enterElementId) {
 	}
 
 	function clear() {
-		clearQuiz();
-		clearInfoMessage();
-		choicesIds.length = 0;
-	}
-
-	function whichIsChecked() {
-		for (let i = 0; i < choicesIds.length; i++) {
-			if (getEl(choicesIds[i]).checked) {
-				setInfoMessage('');
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	function setInfoMessage(text) {
-		clearInfoMessage();
-		getEl(enterElementId).appendChild(create('div', {id: 'infoMessage'}, [createText(text)]));
+		document.getElementById(enterElementId).innerHTML = '';
 	}
 
 	return{
@@ -56,57 +31,16 @@ function HTML(enterElementId) {
 		addText,
 		createChoice,
 		createButton,
-		clear,
-		whichIsChecked,
-		setInfoMessage
+		clear
 	}
 }
-/*
-function createChoices(choicesNumber) {
-	const choicesContainer = create('p');
-	choicesIds = [];
-	for (let i = 0; i < choicesNumber; i++) {
-		choicesIds.push('choice' + i);
-		choicesContainer.appendChild(createChoiceContainer(choicesIds[i]));
-	}
-	return choicesContainer;
-}
-*/
-function createChoiceContainer(text, isChecked) {
+
+
+function createChoiceContainer(text, isChecked, onChangeCallback) {
 	return create('p', {}, [
-		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked}),
+		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
 		create('label', {htmlFor: text}, [createText(text)])
 		]);
-}
-/*
-function setQuestion(Question, userAnswer) {
-	document.getElementById('questionContainer').innerHTML = Question.getQuestion();
-	setAnswers(Question.getAnswers(), userAnswer);
-}
-
-function setAnswers(answers, userAnswer) {
-	for (let i = 0; i < choicesIds.length; i++) {
-		getEl(choicesIds[i]).parentNode.getElementsByTagName('label')[0].innerHTML = answers[i];
-		if (userAnswer !== undefined) {
-			getEl(choicesIds[userAnswer]).checked = true;
-		}
-		else {
-			getEl(choicesIds[i]).checked = false;
-		}
-	}
-}
-*/
-
-function clearQuiz() {
-	if(getEl('quiz')) {
-		getEl('quiz').remove();
-	}
-}
-
-function clearInfoMessage() {
-	if(getEl('infoMessage')) {
-		getEl('infoMessage').remove();
-	}
 }
 
 function create(elementType, attributes, children) {
