@@ -1,28 +1,30 @@
 const Question = require('./question');
+const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
 
   // replace all these, with model object from 'model.js', 
   // all mutations should happen inside model.
-  let questions = [];
-  let currentQuestion = 0;
-  let userAnswers = [];
+  let quiz;
 
   function run() {
+    let questions = [];
+
     getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
+      quiz = new Quiz(questions)
       rerender();
     });
   }
 
 function rerender(message) {
-  UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion), message);
+  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), getUserAnswerId(), message);
 }
 
   function next() {
-    if (userAnswers[currentQuestion]) {
+    if (quiz.getUserAnswer()) {
       if (notLastQuestion()) {
         nextQuestion();
       }
@@ -45,40 +47,40 @@ function rerender(message) {
   }
 
   function onChangeCallback(id) {
-    userAnswers[currentQuestion] = id;
+    quiz.setUserAnswer(id);
   }
 
   function notLastQuestion() {
-    return currentQuestion !== (questions.length - 1);
+    return quiz.getCurrentQuestionId() !== (quiz.getQuestions().length - 1);
   }
 
   function nextQuestion() {
-    currentQuestion++;
+    quiz = quiz.advance();
     rerender();
   }
 
   function notFirstQuestion() {
-    return currentQuestion !== 0;
+    return quiz.getCurrentQuestionId() !== 0;
   }
 
   function previousQuestion() {
-    currentQuestion--;
+    quiz = quiz.regress();
     rerender();
   }
 
   function getCorrectAnswersCount() {
     let correctAnswers = 0;
 
-    for(let i = 0; i < userAnswers.length; i++) {
-      if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
+    for(let i = 0; i < quiz.getQuestions().length; i++) {
+      if (quiz.getQuestions()[i].getCorrectAnswer() === quiz.getUserAnswer(i)) {
         correctAnswers++;
       }
     }
     return correctAnswers;
   }
 
-  function getUserAnswerId(questionId) {
-    return questions[questionId].getAnswers().indexOf(userAnswers[questionId])
+  function getUserAnswerId() {
+    return quiz.getCurrentQuestion().getAnswers().indexOf(quiz.getUserAnswer());
   }
 
   function finish() {

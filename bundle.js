@@ -229,63 +229,87 @@ const HTML = require('./html');
 const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
-},{"./canvas":1,"./html":2,"./quiz":5,"./ui":7}],4:[function(require,module,exports){
+},{"./canvas":1,"./html":2,"./quiz":6,"./ui":8}],4:[function(require,module,exports){
+function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = []) {
+  let questions = _questions;
+  let currentQuestion = _currentQuestion;
+  let userAnswers = _userAnswers;
+
+  return {
+  	getQuestions() {
+  		return questions;
+  	},
+  	getCurrentQuestion() {
+  		return questions[currentQuestion];
+  	},
+    getCurrentQuestionId() {
+      return currentQuestion;
+    },
+    setUserAnswer(answer) {
+      userAnswers[currentQuestion] = answer;
+    },
+    getUserAnswer(questionId = currentQuestion) {
+      return userAnswers[questionId];
+    },
+  	advance() {
+  		return Quiz(questions, currentQuestion + 1, userAnswers);
+  	},
+    regress() {
+      return Quiz(questions, currentQuestion - 1, userAnswers);
+    }
+  };
+}
+
+module.exports = Quiz;
+
+},{}],5:[function(require,module,exports){
 function Question(question, answers, correctAnswer) {
   const _question = question;
   const _answers = answers;
   const _correctAnswer = correctAnswer;
 
-  function getQuestion() {
-    return _question;
-  }
-
-  function getAnswers() {
-    return _answers;
-  }
-
-  function getCorrectAnswerId() {
-    return _correctAnswer;
-  }
-
-  function getCorrectAnswer() {
-    return _answers[_correctAnswer];
-  }
-
   return {
-    getQuestion: getQuestion,
-    getAnswers: getAnswers,
-    getCorrectAnswerId: getCorrectAnswerId,
-    getCorrectAnswer
+    getQuestion() {
+      return _question;
+    },
+    getAnswers() {
+      return _answers;
+    },
+    getCorrectAnswer() {
+      return _correctAnswer;
+    }
   }
 };
 
 module.exports = Question;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 const Question = require('./question');
+const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
 
   // replace all these, with model object from 'model.js', 
   // all mutations should happen inside model.
-  let questions = [];
-  let currentQuestion = 0;
-  let userAnswers = [];
+  let quiz;
 
   function run() {
+    let questions = [];
+
     getJSON('./data/data.json', function (json) {
       for(let i = 0; i < json.questions.length; i++) {
         questions[i] = new Question(json.questions[i].question, json.questions[i].answers, json.questions[i].correctAnswer);
       }
+      quiz = new Quiz(questions)
       rerender();
     });
   }
 
 function rerender(message) {
-  UI.render(next, back, onChangeCallback, questions[currentQuestion], getUserAnswerId(currentQuestion), message);
+  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), getUserAnswerId(), message);
 }
 
   function next() {
-    if (userAnswers[currentQuestion]) {
+    if (quiz.getUserAnswer()) {
       if (notLastQuestion()) {
         nextQuestion();
       }
@@ -308,40 +332,40 @@ function rerender(message) {
   }
 
   function onChangeCallback(id) {
-    userAnswers[currentQuestion] = id;
+    quiz.setUserAnswer(id);
   }
 
   function notLastQuestion() {
-    return currentQuestion !== (questions.length - 1);
+    return quiz.getCurrentQuestionId() !== (quiz.getQuestions().length - 1);
   }
 
   function nextQuestion() {
-    currentQuestion++;
+    quiz = quiz.advance();
     rerender();
   }
 
   function notFirstQuestion() {
-    return currentQuestion !== 0;
+    return quiz.getCurrentQuestionId() !== 0;
   }
 
   function previousQuestion() {
-    currentQuestion--;
+    quiz = quiz.regress();
     rerender();
   }
 
   function getCorrectAnswersCount() {
     let correctAnswers = 0;
 
-    for(let i = 0; i < userAnswers.length; i++) {
-      if (questions[i].getCorrectAnswerId() === userAnswers[i]) {
+    for(let i = 0; i < quiz.getQuestions().length; i++) {
+      if (quiz.getQuestions()[i].getCorrectAnswer() === quiz.getUserAnswer(i)) {
         correctAnswers++;
       }
     }
     return correctAnswers;
   }
 
-  function getUserAnswerId(questionId) {
-    return questions[questionId].getAnswers().indexOf(userAnswers[questionId])
+  function getUserAnswerId() {
+    return quiz.getCurrentQuestion().getAnswers().indexOf(quiz.getUserAnswer());
   }
 
   function finish() {
@@ -355,7 +379,7 @@ function rerender(message) {
 
 module.exports = QuizApp;
 
-},{"./question":4}],6:[function(require,module,exports){
+},{"./model":4,"./question":5}],7:[function(require,module,exports){
 function UIBackend(renderer) {
 	function addContainer(elements) {
 		renderer.addContainer(elements);
@@ -387,7 +411,7 @@ function UIBackend(renderer) {
 }
 
 module.exports = UIBackend;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 //UI -> backend UI -> abstraction (not to DOM)
 //Render Quiz in Console?
 //Canvas API in HTML?
@@ -419,4 +443,4 @@ function UI(renderer) {
 
 module.exports = UI;
 
-},{"./ui-backend":6}]},{},[3]);
+},{"./ui-backend":7}]},{},[3]);
