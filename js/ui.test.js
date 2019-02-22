@@ -1,7 +1,7 @@
 const assert = require('assert');
 const UI = require('./ui');
 const UIBackend = require('./ui-backend');
-const TR = require('./tests-runner');
+const {Suite, test} = require('./tests-runner');
 const Spy = require('./spy.js');
 
 // createSpyObj (Jasmine)
@@ -55,9 +55,9 @@ function fakeRenderer() {
 	}
 }
 
-TR.Suite([
-	TR.test('UI(renderer()).render(values) should pass values to renderer', () => {
-		UI(fakeRenderer('app')).render(() => {}, () => {}, fakeQuestion);
+Suite('UI(renderer()).render(values)', [
+	test('should pass all values to renderer', () => {
+		UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, 'message');
 		spyRemove.assertCalls(1);
 
 		spyGetQuestion.assertCalls(1);
@@ -70,19 +70,9 @@ TR.Suite([
 		spyCreateButton.assertArgument('Previous question');
 		spyCreateButton.assertArgument('Next question');
 		spyCreateButton.assertCalls(2);
-	}),
-	TR.test('UI.whichIsChecked() should return -1 for no checked answers', () => {
-		assert.strictEqual(UI(fakeRenderer()).whichIsChecked(), -1, 'should return -1 for no checked answers');
-	}),
-	TR.test('UI.setInfoMessage(message) should be called with message', () => {
-		UI(fakeRenderer()).setInfoMessage('Test message');
-		spySetInfoMessage.assertArgument('Test message');
-	}),
-	TR.test('UI.clearQuiz() should work', () => {
-		UI(fakeRenderer()).clearQuiz();
-		spyRemove.assertCalls(1);
-	})
-	],
+
+		spyAddText.assertArgument('message');
+	})],
 	() => {
 		spyRemove.refresh();
 	}

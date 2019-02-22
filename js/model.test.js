@@ -1,6 +1,6 @@
 const {Suite, test} = require('./tests-runner');
 const assert = require('assert');
-const {Quiz} = require('./model');
+const Quiz = require('./model');
 const Question = require('./question');
 
 
@@ -19,7 +19,7 @@ Suite('Question', [
 	}),
 	test('knows correct answer', () => {
 		assert.equal(
-			Question(null, ['a', 'b'], 1).getCorrectAnswer(),
+			Question(null, ['a', 'b'], 'b').getCorrectAnswer(),
 			'b'
 		);
 	}),
