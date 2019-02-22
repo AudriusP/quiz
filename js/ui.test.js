@@ -2,24 +2,18 @@ const assert = require('assert');
 const UI = require('./ui');
 const UIBackend = require('./ui-backend');
 const {Suite, test} = require('./tests-runner');
-const Spy = require('./spy.js');
+const SpyObject = require('./spyObject.js');
 
 // createSpyObj (Jasmine)
-const spyRemove = new Spy();
-const spyGetAnswers = new Spy();
-const spyGetQuestion = new Spy();
-const spyAddText = new Spy();
-const spyCreateChoice = new Spy();
-const spyCreateButton = new Spy();
-const spySetInfoMessage = new Spy();
+const spy = new SpyObject(['remove', 'getAnswers', 'getQuestion', 'addText', 'createChoice', 'createButton']);
 
 const fakeQuestion = {
 	getQuestion() {
-		spyGetQuestion.log()
+		spy.getQuestion.log()
 		return 'fakeQuestion';
 	},
 	getAnswers() {
-		spyGetAnswers.log();
+		spy.getAnswers.log();
 		return ['answer1', 'answer2'];
 	}
 }
@@ -27,56 +21,44 @@ const fakeQuestion = {
 function fakeRenderer() {
 	function addContainer(){}
 	function addText(){
-		spyAddText.log(arguments);
+		spy.addText.log(arguments);
 	}
 	function createChoice(){
-		spyCreateChoice.log(arguments);
+		spy.createChoice.log(arguments);
 	}
 	function createButton(){
-		spyCreateButton.log(arguments);
+		spy.createButton.log(arguments);
 	}
 	function clear(){
-		spyRemove.log();
-	}
-	function whichIsChecked(){
-		return -1;
-	}
-	function setInfoMessage(){
-		spySetInfoMessage.log(arguments);
+		spy.remove.log();
 	}
 	return {
 		addContainer,
 		addText,
 		createChoice,
 		createButton,
-		clear,
-		whichIsChecked,
-		setInfoMessage
+		clear
 	}
 }
 
 Suite('UI(renderer()).render(values)', [
 	test('should pass all values to renderer', () => {
 		UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, 'message');
-		spyRemove.assertCalls(1);
+		spy.remove.assertCalls(1);
 
-		spyGetQuestion.assertCalls(1);
-		spyAddText.assertArgument('fakeQuestion');
+		spy.getQuestion.assertCalls(1);
+		spy.addText.assertArgument('fakeQuestion');
 
-		spyGetAnswers.assertCalls(1);
-		spyCreateChoice.assertArgument('answer1');
-		spyCreateChoice.assertArgument('answer2');
+		spy.getAnswers.assertCalls(1);
+		spy.createChoice.assertArgument('answer1');
+		spy.createChoice.assertArgument('answer2');
 
-		spyCreateButton.assertArgument('Previous question');
-		spyCreateButton.assertArgument('Next question');
-		spyCreateButton.assertCalls(2);
+		spy.createButton.assertArgument('Previous question');
+		spy.createButton.assertArgument('Next question');
+		spy.createButton.assertCalls(2);
 
-		spyAddText.assertArgument('message');
-	})],
-	() => {
-		spyRemove.refresh();
-	}
-	).runTests();
+		spy.addText.assertArgument('message');
+	})]).runTests();
 
 
 /*

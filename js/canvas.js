@@ -1,85 +1,84 @@
 //One Canvas
 
 function Canvas(enterElementId) {
-	const choicesIds = [];
+	let canvas;
+	let canvasRows = 0;
 
 	function addContainer(elements) {
 		const enterElement = getEl(enterElementId);
-
-		for (let i = 0; i < elements.length; i++) {
-			enterElement.appendChild(elements[i]);
-		}
+		enterElement.appendChild(canvas);
 	}
 
 	function addText(text) {
-		const canvas = create('canvas', {id: 'text', height: 25, style: 'display:block'}, []);
+		canvasRows++;
 		const ctx = canvas.getContext('2d');
 		ctx.font = '15px Arial';
-		ctx.fillText(text, 10, 15);
-		return canvas;
+		ctx.fillText(text, 10, 20 * canvasRows);
 	}
 
-	function createChoice(text, userAnswer) {
-		let isChecked = false;
-
-		if(userAnswer === choicesIds.length) {
-			isChecked = true;
-		}
-		
-		choicesIds.push(text);
-		return createChoiceContainer(text, isChecked);
+	function createChoice(text, index, userAnswer, onChangeCallback) {
+		createChoiceContainer(text, userAnswer === index, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
-		const button = create('canvas', {id: 'button', width: 150, height: 20, onclick: fnc}, []);
+		canvasRows++;
+		const buttonX = 0;
+		const buttonY = 20 * canvasRows - 15;
+		const ctx = canvas.getContext('2d');
 
-		var ctx = button.getContext('2d');
-		ctx.rect(0, 0, 150, 20);
+		ctx.rect(buttonX, buttonY, 150, 20);
 		ctx.stroke();
 
 		ctx.font = '15px Arial';
-		ctx.fillText(text, 10, 15);
-		return button;
+		ctx.fillText(text, 10, 20 * canvasRows);
+
+		canvas.addEventListener('click', (e) => {
+			const pos = {
+				x: e.clientX,
+				y: e.clientY
+			}
+
+			if (pos.x >= buttonX && pos.x <= buttonX + 150 &&
+				pos.y >= buttonY && pos.y <= buttonY + 20) {
+				fnc();
+			}
+		});
 	}
 
 	function clear() {
-		clearQuiz();
-		clearInfoMessage();
-		choicesIds.length = 0;
+		document.getElementById(enterElementId).innerHTML = '';
+		canvasRows = 0;
+		canvas = create('canvas', {id: 'container', height: 500, style: 'display:block'}, []);
 	}
 
-	function whichIsChecked() {
-		for (let i = 0; i < choicesIds.length; i++) {
-			if (getEl(choicesIds[i]).checked) {
-				setInfoMessage('');
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	function setInfoMessage(text) {
-		clearInfoMessage();
-		const canvas = create('canvas', {id: 'infoMessage', height: 25, style: 'display:block'}, []);
+	function createChoiceContainer(text, isChecked, onChangeCallback) {
+		canvasRows++;
+		const currentCanvasRows = canvasRows;
+		const containerX = 0;
+		const containerY = 20 * canvasRows - 7;
 		const ctx = canvas.getContext('2d');
-		ctx.font = '15px Arial';
-		ctx.fillText(text, 10, 15);
-
-		getEl(enterElementId).appendChild(canvas);
-	}
-
-	function createChoiceContainer(text, isChecked) {
-		const choice = create('canvas', {id: text, height: 25, style: 'display:block', onclick: () => {checkChoice(text)}}, []);
-		choice.setAttribute('data-checked', isChecked);
-		const ctx = choice.getContext('2d');
 
 		ctx.beginPath();
-		ctx.arc(10, 10, 5, 0, 2 * Math.PI);
+		ctx.arc(10, 20 * canvasRows- 5, 5, 0, 2 * Math.PI);
 		ctx.stroke();
 
 		ctx.font = '15px Arial';
-		ctx.fillText(text, 20, 15);
-		return choice;
+		ctx.fillText(text, 20, 20 * canvasRows);
+
+		canvas.addEventListener('click', (e) => {
+			const pos = {
+				x: e.clientX,
+				y: e.clientY
+			}
+
+			if (pos.x >= containerX && pos.x <= containerX + 150 &&
+				pos.y >= containerY && pos.y <= containerY + 15) {
+				onChangeCallback(text);
+				const ctx = canvas.getContext('2d');
+				ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
+				ctx.stroke();
+			}
+		});
 	}
 
 	function checkChoice(text) {
@@ -109,21 +108,7 @@ function Canvas(enterElementId) {
 		addText,
 		createChoice,
 		createButton,
-		clear,
-		whichIsChecked,
-		setInfoMessage
-	}
-}
-
-function clearQuiz() {
-	if(getEl('quiz')) {
-		getEl('quiz').remove();
-	}
-}
-
-function clearInfoMessage() {
-	if(getEl('infoMessage')) {
-		getEl('infoMessage').remove();
+		clear
 	}
 }
 

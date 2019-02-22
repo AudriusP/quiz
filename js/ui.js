@@ -1,4 +1,3 @@
-//UI -> backend UI -> abstraction (not to DOM)
 //Render Quiz in Console?
 //Canvas API in HTML?
 //Tests - helps or not?
@@ -8,17 +7,18 @@ const UIBackend = require('./ui-backend');
 
 
 function UI(renderer) {
+  const ui = UIBackend(renderer);
 
   function render(next, back, onChangeCallback, Question, userAnswer, message = '') {
-    UIBackend(renderer).clear();
-    UIBackend(renderer).addContainer([
-      UIBackend(renderer).createText(Question.getQuestion()),
-      ...Question.getAnswers().map((answer, index) => UIBackend(renderer).createChoice(answer, index, userAnswer, onChangeCallback)),
-      UIBackend(renderer).createButton('Previous question', back),
-      UIBackend(renderer).createButton('Next question', next),
+    ui.clear();
+    ui.addContainer([
+      ui.createText(Question.getQuestion()),
+      ...Question.getAnswers().map((answer, index) => ui.createChoice(answer, index, userAnswer, onChangeCallback)),
+      ui.createButton('Previous question', back),
+      ui.createButton('Next question', next),
       ]);
-    UIBackend(renderer).addContainer([
-      UIBackend(renderer).createText(message),
+    ui.addContainer([
+      ui.createText(message),
     ]);
   }
 
