@@ -241,6 +241,17 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = []) {
   	},
     regress() {
       return Quiz(questions, currentQuestion - 1, userAnswers);
+    },
+    getCorrectAnswersCount() {
+      let count = 0;
+
+      for(let i = 0; i < questions.length; i++) {
+        if(questions[i].getCorrectAnswer() === userAnswers[i]) {
+          count++;
+        }
+      }
+
+      return count;
     }
   };
 }
@@ -294,26 +305,30 @@ function rerender(message) {
 }
 
   function next() {
+    let message;
     if (quiz.getUserAnswer()) {
       if (notLastQuestion()) {
-        nextQuestion();
+        quiz = quiz.advance();
       }
       else {
-        finish();
+        message = 'You answered ' + quiz.getCorrectAnswersCount() + ' questions correctly!';
       }
     }
     else {
-      rerender('Choose answer!');
+      message = 'Choose answer!';
     }
+    rerender(message);
   }
 
   function back() {
+    let message;
     if (notFirstQuestion()) {
-      previousQuestion();
+      quiz = quiz.regress();
     }
     else {
-      rerender('This is first question!');
+      message = 'This is first question!';
     }
+    rerender(message);
   }
 
   function onChangeCallback(id) {
@@ -324,37 +339,12 @@ function rerender(message) {
     return quiz.getCurrentQuestionId() !== (quiz.getQuestions().length - 1);
   }
 
-  function nextQuestion() {
-    quiz = quiz.advance();
-    rerender();
-  }
-
   function notFirstQuestion() {
     return quiz.getCurrentQuestionId() !== 0;
   }
 
-  function previousQuestion() {
-    quiz = quiz.regress();
-    rerender();
-  }
-
-  function getCorrectAnswersCount() {
-    let correctAnswers = 0;
-
-    for(let i = 0; i < quiz.getQuestions().length; i++) {
-      if (quiz.getQuestions()[i].getCorrectAnswer() === quiz.getUserAnswer(i)) {
-        correctAnswers++;
-      }
-    }
-    return correctAnswers;
-  }
-
   function getUserAnswerId() {
     return quiz.getCurrentQuestion().getAnswers().indexOf(quiz.getUserAnswer());
-  }
-
-  function finish() {
-    rerender('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
   }
 
   return {

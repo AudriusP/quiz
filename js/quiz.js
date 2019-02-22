@@ -22,28 +22,34 @@ function QuizApp(UI, getJSON) {
 function rerender(message) {
   UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), getUserAnswerId(), message);
 }
-
+// MVC pattern ? -> Controller gets state (Quiz) and says what to do -> message or else
+//Immutable? Mutable?
+// Or in model - advance, regress returns error or obj
   function next() {
+    let message;
     if (quiz.getUserAnswer()) {
       if (notLastQuestion()) {
-        nextQuestion();
+        quiz = quiz.advance();
       }
       else {
-        finish();
+        message = 'You answered ' + quiz.getCorrectAnswersCount() + ' questions correctly!';
       }
     }
     else {
-      rerender('Choose answer!');
+      message = 'Choose answer!';
     }
+    rerender(message);
   }
 
   function back() {
+    let message;
     if (notFirstQuestion()) {
-      previousQuestion();
+      quiz = quiz.regress();
     }
     else {
-      rerender('This is first question!');
+      message = 'This is first question!';
     }
+    rerender(message);
   }
 
   function onChangeCallback(id) {
@@ -54,37 +60,12 @@ function rerender(message) {
     return quiz.getCurrentQuestionId() !== (quiz.getQuestions().length - 1);
   }
 
-  function nextQuestion() {
-    quiz = quiz.advance();
-    rerender();
-  }
-
   function notFirstQuestion() {
     return quiz.getCurrentQuestionId() !== 0;
   }
 
-  function previousQuestion() {
-    quiz = quiz.regress();
-    rerender();
-  }
-
-  function getCorrectAnswersCount() {
-    let correctAnswers = 0;
-
-    for(let i = 0; i < quiz.getQuestions().length; i++) {
-      if (quiz.getQuestions()[i].getCorrectAnswer() === quiz.getUserAnswer(i)) {
-        correctAnswers++;
-      }
-    }
-    return correctAnswers;
-  }
-
   function getUserAnswerId() {
     return quiz.getCurrentQuestion().getAnswers().indexOf(quiz.getUserAnswer());
-  }
-
-  function finish() {
-    rerender('You answered ' + getCorrectAnswersCount() + ' questions correctly!');
   }
 
   return {
