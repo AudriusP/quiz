@@ -4,7 +4,6 @@ const UIBackend = require('./ui-backend');
 const {Suite, test} = require('./tests-runner');
 const SpyObject = require('./spyObject.js');
 
-// createSpyObj (Jasmine)
 const spy = new SpyObject(['remove', 'getAnswers', 'getQuestion', 'addText', 'createChoice', 'createButton']);
 
 const fakeQuestion = {

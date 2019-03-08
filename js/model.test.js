@@ -26,7 +26,7 @@ Suite('Question', [
 ]).runTests()
 
 Suite('Quiz', [
-	test('should not crash when getting current question if there are none', () => {
+	test('should not crash when getting current question if there is none', () => {
 		Quiz().getCurrentQuestion();
 	}),
 	test('should start with first question as current', () => {
@@ -45,6 +45,10 @@ Suite('Quiz', [
 			0
 		);
 	}),
+	test('should not crash when getting user answer id if there is none', () => {
+		const questions = [Question('A', [])];
+		Quiz(questions).getUserAnswerId();
+	}),
 	test('should get correct user answer id', () => {
 		const questions = [Question('A', ['a', 'b']), Question('B', ['b', 'a'])];
 		const quiz = Quiz(questions, 1, ['a', 'b']);
@@ -52,6 +56,9 @@ Suite('Quiz', [
 			quiz.getUserAnswerId(),
 			0
 			)
+	}),
+	test('should not crash when getting message if there is none', () => {
+		Quiz().getMessage();
 	}),
 	test('should be able to get message', () => {
 		const quiz = Quiz([], 0, [], 'message');
@@ -91,6 +98,18 @@ Suite('Quiz', [
 			quiz.getCurrentQuestion().getQuestion(),
 			'B'
 		);
+	}),
+	test('should not regress and should show error if first question', () => {
+		const questions = [Question('A')];
+		const quiz = Quiz(questions, 0).regress();
+		assert.equal(
+			quiz.getCurrentQuestion().getQuestion(),
+			'A'
+			);
+		assert.equal(
+			quiz.getMessage(),
+			'This is first question!'
+			);
 	}),
 	test('can regress', () => {
 		const questions = [Question('A'), Question('B')];

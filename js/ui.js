@@ -1,7 +1,3 @@
-//Render Quiz in Console?
-//Canvas API in HTML?
-//Tests - helps or not?
-//Pure Function - read
 //React -> React Native - using same parts? Paint app? Pixel based? Saving
 const UIBackend = require('./ui-backend');
 

@@ -21,7 +21,9 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
   		return questions[currentQuestion];
   	},
     setUserAnswer(answer) {
-      userAnswers[currentQuestion] = answer;
+      const _userAnswers = userAnswers
+      _userAnswers[currentQuestion] = answer;
+
       return Quiz(questions, currentQuestion, userAnswers);
     },
     getUserAnswerId() {
@@ -41,6 +43,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
       } else {
         _currentQuestion++;
       }
+
       return Quiz(questions, _currentQuestion, userAnswers, _message);
   	},
     regress() {
@@ -52,6 +55,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
       } else {
         _currentQuestion--;
       }
+
       return Quiz(questions, _currentQuestion, userAnswers, _message);
     },
   };

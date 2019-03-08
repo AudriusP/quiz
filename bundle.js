@@ -221,7 +221,8 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
   		return questions[currentQuestion];
   	},
     setUserAnswer(answer) {
-      userAnswers[currentQuestion] = answer;
+      const _userAnswers = userAnswers
+      _userAnswers[currentQuestion] = answer;
       return Quiz(questions, currentQuestion, userAnswers);
     },
     getUserAnswerId() {
@@ -359,10 +360,6 @@ function UIBackend(renderer) {
 
 module.exports = UIBackend;
 },{}],8:[function(require,module,exports){
-//Render Quiz in Console?
-//Canvas API in HTML?
-//Tests - helps or not?
-//Pure Function - read
 //React -> React Native - using same parts? Paint app? Pixel based? Saving
 const UIBackend = require('./ui-backend');
 
