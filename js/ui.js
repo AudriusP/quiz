@@ -1,4 +1,11 @@
 //React -> React Native - using same parts? Paint app? Pixel based? Saving
+//Express.js -> requets, framework
+//node.js
+//Server/Client rendering?
+//Security? Registering?
+//Not one DB ->
+//Abstraction saving~
+//Build tools -> webpack?
 const UIBackend = require('./ui-backend');
 
 
