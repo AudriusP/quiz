@@ -26,10 +26,6 @@ Suite('Question', [
 ]).runTests()
 
 Suite('Quiz', [
-	test('should know questions that it was given', () => {
-		const questions = [Question()];
-		assert.deepEqual(Quiz(questions).getQuestions(), questions);
-	}),
 	test('should not crash when getting current question if there are none', () => {
 		Quiz().getCurrentQuestion();
 	}),
@@ -40,35 +36,57 @@ Suite('Quiz', [
 			'A'
 		);
 	}),
-	test('should know current question id', () => {
+	test('should be able to set user answer', () => {
+		const questions = [Question('A', ['a', 'b'])];
+		let quiz = Quiz(questions, 0);
+		quiz = quiz.setUserAnswer('a')
 		assert.equal(
-			Quiz([], 1).getCurrentQuestionId(),
-			1
-		);
-	}),
-	test('should be able to set and get user answer', () => {
-		const quiz = Quiz();
-		quiz.setUserAnswer(0)
-		assert.equal(
-			quiz.getUserAnswer(),
+			quiz.getUserAnswerId(),
 			0
 		);
 	}),
-	test('should get current question user answer by default', () => {
+	test('should get correct user answer id', () => {
+		const questions = [Question('A', ['a', 'b']), Question('B', ['b', 'a'])];
+		const quiz = Quiz(questions, 1, ['a', 'b']);
 		assert.equal(
-			Quiz([], 1, ['a', 'b']).getUserAnswer(),
-			'b'
-		);
+			quiz.getUserAnswerId(),
+			0
+			)
 	}),
-	test('should get correct question user answer', () => {
+	test('should be able to get message', () => {
+		const quiz = Quiz([], 0, [], 'message');
 		assert.equal(
-			Quiz([], 0, ['a', 'b', 'c']).getUserAnswer(2),
-			'c'
-		);
+			quiz.getMessage(),
+			'message'
+			);
+	}),
+	test('should not advance and should show error if user not answered', () => {
+		const questions = [Question('A'), Question('B')];
+		const quiz = Quiz(questions, 0, []).advance();
+		assert.equal(
+			quiz.getCurrentQuestion().getQuestion(),
+			'A'
+			);
+		assert.equal(
+			quiz.getMessage(),
+			'Choose answer!'
+			);
+	}),
+	test('should not advance and should show error if last question', () => {
+		const questions = [Question('A'), Question('B')];
+		const quiz = Quiz(questions, 1, ['a', 'b']).advance();
+		assert.equal(
+			quiz.getCurrentQuestion().getQuestion(),
+			'B'
+			);
+		assert.equal(
+			quiz.getMessage(),
+			'You answered 0 questions correctly!'
+			);
 	}),
 	test('can advance', () => {
 		const questions = [Question('A'), Question('B')];
-		const quiz = Quiz(questions).advance();
+		const quiz = Quiz(questions, 0, ['a']).advance();
 		assert.equal(
 			quiz.getCurrentQuestion().getQuestion(),
 			'B'
@@ -82,6 +100,7 @@ Suite('Quiz', [
 			'A'
 		);
 	}),
+	/*
 	test('should return 0 correct answers count for empty question', () => {
 		assert.equal(
 			Quiz().getCorrectAnswersCount(),
@@ -111,5 +130,6 @@ Suite('Quiz', [
 			2
 		);
 	})
+	*/
 ]).runTests()
 

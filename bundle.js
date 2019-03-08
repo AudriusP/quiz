@@ -1,6 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-//One Canvas
-
 function Canvas(enterElementId) {
 	let canvas;
 	let canvasRows = 0;
@@ -66,6 +64,12 @@ function Canvas(enterElementId) {
 		ctx.font = '15px Arial';
 		ctx.fillText(text, 20, 20 * canvasRows);
 
+		if(isChecked) {
+			ctx.beginPath();
+			ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
+			ctx.stroke();
+		}
+
 		canvas.addEventListener('click', (e) => {
 			const pos = {
 				x: e.clientX,
@@ -76,32 +80,11 @@ function Canvas(enterElementId) {
 				pos.y >= containerY && pos.y <= containerY + 15) {
 				onChangeCallback(text);
 				const ctx = canvas.getContext('2d');
+				ctx.beginPath();
 				ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
 				ctx.stroke();
 			}
 		});
-	}
-
-	function checkChoice(text) {
-		for (let i = 0; i < choicesIds.length; i++) {
-			const choice = getEl(choicesIds[i]);
-			const ctx = choice.getContext('2d');
-			ctx.lineWidth = '2';
-			ctx.strokeStyle = 'white';
-			ctx.beginPath();
-			ctx.arc(10, 10, 2, 0, 2 * Math.PI);
-			ctx.stroke();
-			choice.setAttribute('data-checked', false);
-		}
-
-		const choice = getEl(text);
-		const ctx = choice.getContext('2d');
-		ctx.lineWidth = '1';
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.arc(10, 10, 2, 0, 2 * Math.PI);
-		ctx.stroke();
-		choice.setAttribute('data-checked', true);
 	}
 
 	return {
@@ -215,44 +198,62 @@ const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
 },{"./canvas":1,"./html":2,"./quiz":6,"./ui":8}],4:[function(require,module,exports){
-function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = []) {
+function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message = '') {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
+  let message = _message;
+
+  function getCorrectAnswersCount() {
+    let count = 0;
+
+    for(let i = 0; i < questions.length; i++) {
+      if(questions[i].getCorrectAnswer() === userAnswers[i]) {
+        count++;
+      }
+    }
+
+    return count;
+  }
 
   return {
-  	getQuestions() {
-  		return questions;
-  	},
   	getCurrentQuestion() {
   		return questions[currentQuestion];
   	},
-    getCurrentQuestionId() {
-      return currentQuestion;
-    },
     setUserAnswer(answer) {
       userAnswers[currentQuestion] = answer;
+      return Quiz(questions, currentQuestion, userAnswers);
     },
-    getUserAnswer(questionId = currentQuestion) {
-      return userAnswers[questionId];
+    getUserAnswerId() {
+      return questions[currentQuestion].getAnswers().indexOf(userAnswers[currentQuestion]);
+    },
+    getMessage() {
+      return message;
     },
   	advance() {
-  		return Quiz(questions, currentQuestion + 1, userAnswers);
+      let _message = '';
+      let _currentQuestion = currentQuestion;
+
+      if(!userAnswers[currentQuestion]) {
+        _message = 'Choose answer!';
+      } else if (currentQuestion == questions.length - 1) {
+        _message = 'You answered ' + getCorrectAnswersCount() + ' questions correctly!';
+      } else {
+        _currentQuestion++;
+      }
+      return Quiz(questions, _currentQuestion, userAnswers, _message);
   	},
     regress() {
-      return Quiz(questions, currentQuestion - 1, userAnswers);
-    },
-    getCorrectAnswersCount() {
-      let count = 0;
+      let _message = '';
+      let _currentQuestion = currentQuestion;
 
-      for(let i = 0; i < questions.length; i++) {
-        if(questions[i].getCorrectAnswer() === userAnswers[i]) {
-          count++;
-        }
+      if(currentQuestion == 0) {
+        _message = 'This is first question!';
+      } else {
+        _currentQuestion--;
       }
-
-      return count;
-    }
+      return Quiz(questions, _currentQuestion, userAnswers, _message);
+    },
   };
 }
 
@@ -283,9 +284,6 @@ const Question = require('./question');
 const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
-
-  // replace all these, with model object from 'model.js', 
-  // all mutations should happen inside model.
   let quiz;
 
   function run() {
@@ -300,51 +298,25 @@ function QuizApp(UI, getJSON) {
     });
   }
 
-function rerender(message) {
-  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), getUserAnswerId(), message);
+function rerender() {
+  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
 }
-
+// MVC pattern ? -> Controller gets state (Quiz) and says what to do -> message or else
+//Immutable? Mutable?
+// Or in model - advance, regress returns error or obj
   function next() {
-    let message;
-    if (quiz.getUserAnswer()) {
-      if (notLastQuestion()) {
-        quiz = quiz.advance();
-      }
-      else {
-        message = 'You answered ' + quiz.getCorrectAnswersCount() + ' questions correctly!';
-      }
-    }
-    else {
-      message = 'Choose answer!';
-    }
-    rerender(message);
+    quiz = quiz.advance();
+    rerender();
   }
 
   function back() {
-    let message;
-    if (notFirstQuestion()) {
-      quiz = quiz.regress();
-    }
-    else {
-      message = 'This is first question!';
-    }
-    rerender(message);
+    quiz = quiz.regress();
+    rerender();
   }
 
   function onChangeCallback(id) {
-    quiz.setUserAnswer(id);
-  }
-
-  function notLastQuestion() {
-    return quiz.getCurrentQuestionId() !== (quiz.getQuestions().length - 1);
-  }
-
-  function notFirstQuestion() {
-    return quiz.getCurrentQuestionId() !== 0;
-  }
-
-  function getUserAnswerId() {
-    return quiz.getCurrentQuestion().getAnswers().indexOf(quiz.getUserAnswer());
+    quiz = quiz.setUserAnswer(id);
+    rerender();
   }
 
   return {

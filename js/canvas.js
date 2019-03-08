@@ -1,5 +1,3 @@
-//One Canvas
-
 function Canvas(enterElementId) {
 	let canvas;
 	let canvasRows = 0;
@@ -65,6 +63,12 @@ function Canvas(enterElementId) {
 		ctx.font = '15px Arial';
 		ctx.fillText(text, 20, 20 * canvasRows);
 
+		if(isChecked) {
+			ctx.beginPath();
+			ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
+			ctx.stroke();
+		}
+
 		canvas.addEventListener('click', (e) => {
 			const pos = {
 				x: e.clientX,
@@ -75,32 +79,11 @@ function Canvas(enterElementId) {
 				pos.y >= containerY && pos.y <= containerY + 15) {
 				onChangeCallback(text);
 				const ctx = canvas.getContext('2d');
+				ctx.beginPath();
 				ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
 				ctx.stroke();
 			}
 		});
-	}
-
-	function checkChoice(text) {
-		for (let i = 0; i < choicesIds.length; i++) {
-			const choice = getEl(choicesIds[i]);
-			const ctx = choice.getContext('2d');
-			ctx.lineWidth = '2';
-			ctx.strokeStyle = 'white';
-			ctx.beginPath();
-			ctx.arc(10, 10, 2, 0, 2 * Math.PI);
-			ctx.stroke();
-			choice.setAttribute('data-checked', false);
-		}
-
-		const choice = getEl(text);
-		const ctx = choice.getContext('2d');
-		ctx.lineWidth = '1';
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.arc(10, 10, 2, 0, 2 * Math.PI);
-		ctx.stroke();
-		choice.setAttribute('data-checked', true);
 	}
 
 	return {
