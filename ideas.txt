@@ -1,0 +1,46 @@
+//React -> React Native - using same parts? Paint app? Pixel based? Saving
+//Express.js -> requets, framework
+//node.js
+//Server/Client rendering?
+//Security? Registering?
+//Not one DB ->
+//Abstraction saving~
+//Build tools -> webpack?
+
+/*
+model = Quiz(...);
+
+model.onChange(() => UI.render(model));
+
+q = model.getCurrentQuestion();
+
+backend.render({
+	row: q.getAnswers().map((answer, i) => 
+		({choice: answer, selected: currentAnswer === i, onClick: () => model.answerCurrentQuestion(i)}))
+})
+*/
+
+/*
+describe('Quiz', () => {
+	it('should render question, choices, and navigation buttons', () => {
+		API = fakeAPI().returns({
+			questions: [
+			   question: 'Question',
+			   answers: ['Answer 1', 'Answer 2'],
+			   correctAnswerIndex: 0,
+			]
+		})
+		backend = fakeHtmlBackend();
+		Quick(UI(backend), API).run();
+		expect(backend.render).wasCalledWith({
+			rows: [
+				{text: 'Question'},
+				{rows: [
+					{choice: 'Answer 1', selected: false, onClick: () => {}},
+					{choice: 'Answer 2', selected: false, onClick: () => {}}
+				]}
+			]
+		});
+	});
+});
+*/

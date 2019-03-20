@@ -1,4 +1,20 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+function getCorrectAnswersCount(questions = [], userAnswers = []) {
+	let count = 0;
+
+	for(let i = 0; i < questions.length; i++) {
+	  if(questions[i].getCorrectAnswer() === userAnswers[i]) {
+	    count++;
+	  }
+	}
+
+	return count;
+}
+
+module.exports = {
+	getCorrectAnswersCount
+};
+},{}],2:[function(require,module,exports){
 function Canvas(enterElementId) {
 	let canvas;
 	let canvasRows = 0;
@@ -40,8 +56,8 @@ function Canvas(enterElementId) {
 			if (pos.x >= buttonX && pos.x <= buttonX + 150 &&
 				pos.y >= buttonY && pos.y <= buttonY + 20) {
 				fnc();
-			}
-		});
+		}
+	});
 	}
 
 	function clear() {
@@ -79,12 +95,12 @@ function Canvas(enterElementId) {
 			if (pos.x >= containerX && pos.x <= containerX + 150 &&
 				pos.y >= containerY && pos.y <= containerY + 15) {
 				onChangeCallback(text);
-				const ctx = canvas.getContext('2d');
-				ctx.beginPath();
-				ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
-				ctx.stroke();
-			}
-		});
+			const ctx = canvas.getContext('2d');
+			ctx.beginPath();
+			ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
+			ctx.stroke();
+		}
+	});
 	}
 
 	return {
@@ -118,7 +134,7 @@ function getEl(elementId) {
 
 module.exports = Canvas;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 function HTML(enterElementId) {
 
 	function addContainer(elements) {
@@ -190,31 +206,21 @@ function getEl(elementId) {
 
 module.exports = HTML;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 const Quiz = require('./quiz');
 const UI = require('./ui');
 const HTML = require('./html');
 const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
-},{"./canvas":1,"./html":2,"./quiz":6,"./ui":8}],4:[function(require,module,exports){
+},{"./canvas":2,"./html":3,"./quiz":7,"./ui":9}],5:[function(require,module,exports){
+const {getCorrectAnswersCount} = require('./calculator');
+
 function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message = '') {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
   let message = _message;
-
-  function getCorrectAnswersCount() {
-    let count = 0;
-
-    for(let i = 0; i < questions.length; i++) {
-      if(questions[i].getCorrectAnswer() === userAnswers[i]) {
-        count++;
-      }
-    }
-
-    return count;
-  }
 
   return {
   	getCurrentQuestion() {
@@ -223,6 +229,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
     setUserAnswer(answer) {
       const _userAnswers = userAnswers
       _userAnswers[currentQuestion] = answer;
+
       return Quiz(questions, currentQuestion, userAnswers);
     },
     getUserAnswerId() {
@@ -238,10 +245,11 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
       if(!userAnswers[currentQuestion]) {
         _message = 'Choose answer!';
       } else if (currentQuestion == questions.length - 1) {
-        _message = 'You answered ' + getCorrectAnswersCount() + ' questions correctly!';
+        _message = 'You answered ' + getCorrectAnswersCount(questions, userAnswers) + ' questions correctly!';
       } else {
         _currentQuestion++;
       }
+
       return Quiz(questions, _currentQuestion, userAnswers, _message);
   	},
     regress() {
@@ -253,6 +261,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
       } else {
         _currentQuestion--;
       }
+
       return Quiz(questions, _currentQuestion, userAnswers, _message);
     },
   };
@@ -260,7 +269,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
 
 module.exports = Quiz;
 
-},{}],5:[function(require,module,exports){
+},{"./calculator":1}],6:[function(require,module,exports){
 function Question(question, answers, correctAnswer) {
   const _question = question;
   const _answers = answers;
@@ -280,7 +289,8 @@ function Question(question, answers, correctAnswer) {
 };
 
 module.exports = Question;
-},{}],6:[function(require,module,exports){
+
+},{}],7:[function(require,module,exports){
 const Question = require('./question');
 const Quiz = require('./model');
 
@@ -299,12 +309,10 @@ function QuizApp(UI, getJSON) {
     });
   }
 
-function rerender() {
-  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
-}
-// MVC pattern ? -> Controller gets state (Quiz) and says what to do -> message or else
-//Immutable? Mutable?
-// Or in model - advance, regress returns error or obj
+  function rerender() {
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
+  }
+
   function next() {
     quiz = quiz.advance();
     rerender();
@@ -327,7 +335,7 @@ function rerender() {
 
 module.exports = QuizApp;
 
-},{"./model":4,"./question":5}],7:[function(require,module,exports){
+},{"./model":5,"./question":6}],8:[function(require,module,exports){
 function UIBackend(renderer) {
 	function addContainer(elements) {
 		renderer.addContainer(elements);
@@ -359,10 +367,9 @@ function UIBackend(renderer) {
 }
 
 module.exports = UIBackend;
-},{}],8:[function(require,module,exports){
-//React -> React Native - using same parts? Paint app? Pixel based? Saving
-const UIBackend = require('./ui-backend');
 
+},{}],9:[function(require,module,exports){
+const UIBackend = require('./ui-backend');
 
 function UI(renderer) {
   const ui = UIBackend(renderer);
@@ -387,4 +394,4 @@ function UI(renderer) {
 
 module.exports = UI;
 
-},{"./ui-backend":7}]},{},[3]);
+},{"./ui-backend":8}]},{},[4]);

@@ -39,8 +39,8 @@ function Canvas(enterElementId) {
 			if (pos.x >= buttonX && pos.x <= buttonX + 150 &&
 				pos.y >= buttonY && pos.y <= buttonY + 20) {
 				fnc();
-			}
-		});
+		}
+	});
 	}
 
 	function clear() {
@@ -78,12 +78,12 @@ function Canvas(enterElementId) {
 			if (pos.x >= containerX && pos.x <= containerX + 150 &&
 				pos.y >= containerY && pos.y <= containerY + 15) {
 				onChangeCallback(text);
-				const ctx = canvas.getContext('2d');
-				ctx.beginPath();
-				ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
-				ctx.stroke();
-			}
-		});
+			const ctx = canvas.getContext('2d');
+			ctx.beginPath();
+			ctx.arc(10, 20 * currentCanvasRows - 5, 2, 0, 2 * Math.PI);
+			ctx.stroke();
+		}
+	});
 	}
 
 	return {

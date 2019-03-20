@@ -1,5 +1,3 @@
-//tape test runner - check insides
-
 const QuizApp = require('./quiz');
 const {Suite, test} = require('./tests-runner');
 const Spy = require('./spy');

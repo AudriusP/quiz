@@ -1,20 +1,10 @@
+const {getCorrectAnswersCount} = require('./calculator');
+
 function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message = '') {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
   let message = _message;
-
-  function getCorrectAnswersCount() {
-    let count = 0;
-
-    for(let i = 0; i < questions.length; i++) {
-      if(questions[i].getCorrectAnswer() === userAnswers[i]) {
-        count++;
-      }
-    }
-
-    return count;
-  }
 
   return {
   	getCurrentQuestion() {
@@ -39,7 +29,7 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message
       if(!userAnswers[currentQuestion]) {
         _message = 'Choose answer!';
       } else if (currentQuestion == questions.length - 1) {
-        _message = 'You answered ' + getCorrectAnswersCount() + ' questions correctly!';
+        _message = 'You answered ' + getCorrectAnswersCount(questions, userAnswers) + ' questions correctly!';
       } else {
         _currentQuestion++;
       }

@@ -16,12 +16,10 @@ function QuizApp(UI, getJSON) {
     });
   }
 
-function rerender() {
-  UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
-}
-// MVC pattern ? -> Controller gets state (Quiz) and says what to do -> message or else
-//Immutable? Mutable?
-// Or in model - advance, regress returns error or obj
+  function rerender() {
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
+  }
+
   function next() {
     quiz = quiz.advance();
     rerender();
