@@ -3,8 +3,16 @@ const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
   //Mocha/Jest - ?
+  //Mocha - run all test files via command line
   //Keli quiz appsai?
   //Nerenderint be reikalo, observer/listener pattern -> ar padeda? Kaip ispresti, kad kviesti rereneder tik tada, kai is tikro pasikeicia?
+
+  // Pass current Quiz to model? Then in model check current Quiz with what new Quiz should be returned?
+  // Then return in status {rerender: true} if needed?
+  // rerender(quiz.getStatus().rerender)?
+  // or
+  // if(quiz.getStatus().rerender) { rerender()}
+
   let quiz;
 
   function run() {
@@ -24,6 +32,7 @@ function QuizApp(UI, getJSON) {
   }
 
   function next() {
+    // 1 possibility - check here quiz -> model quiz returned?
     quiz = quiz.advance();
     rerender();
   }

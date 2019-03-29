@@ -142,12 +142,13 @@ module.exports = Canvas;
 function HTML(enterElementId) {
 	let containers = [];
 	const enterElement = getEl(enterElementId);
+	let _enterElement;
 	const date = new Date();
 	const uniqueId = date.getTime();
 
 	function addContainer(elements) {
 		const element = create('div', {}, []);
-		enterElement.appendChild(element);
+		_enterElement.appendChild(element);
 		containers.push(element);
 
 		for (let i = 0; i < elements.length; i++) {
@@ -171,9 +172,13 @@ function HTML(enterElementId) {
 	}
 
 	function clear() {
+		if(_enterElement == undefined) {
+			_enterElement = create('div', {}, []);
+			enterElement.appendChild(_enterElement);
+		}
 		if(containers.length > 0) {
 			containers.forEach(function(container) {
-				enterElement.removeChild(container);
+				_enterElement.removeChild(container);
 			})
 			containers = [];
 		}

@@ -1,5 +1,6 @@
 const {getCorrectAnswersCount} = require('./calculator');
-
+// Listen on Change? function -> use where returning Quiz - if changed - call callback who asked
+// Maybe _status - just in with code what to do with message
 function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _status = {}) {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
