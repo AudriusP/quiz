@@ -2,6 +2,9 @@ const Question = require('./question');
 const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
+  //Mocha/Jest - ?
+  //Keli quiz appsai?
+  //Nerenderint be reikalo, observer/listener pattern -> ar padeda? Kaip ispresti, kad kviesti rereneder tik tada, kai is tikro pasikeicia?
   let quiz;
 
   function run() {
@@ -17,7 +20,7 @@ function QuizApp(UI, getJSON) {
   }
 
   function rerender() {
-    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getStatus());
   }
 
   function next() {

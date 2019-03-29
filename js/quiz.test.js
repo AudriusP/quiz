@@ -1,5 +1,4 @@
 const QuizApp = require('./quiz');
-const {Suite, test} = require('./tests-runner');
 const Spy = require('./spy');
 
 function fakeGetJSON(json) {
@@ -14,15 +13,14 @@ const fakeUI ={
 	}
 }
 
-Suite('QuizApp.run()', [
-	test('should work with empty JSON', () => {
-		QuizApp(fakeUI, fakeGetJSON({questions: [{question: '', answers: [], correctAnswer: ''}]})).run();
+describe('QuizApp.run()', function() {
+    it('should work with empty JSON', function() {
+      QuizApp(fakeUI, fakeGetJSON({questions: [{question: '', answers: [], correctAnswer: ''}]})).run();
 		spyRender.assertCalls(1);
-	}),
-	test('should work with real JSON', () => {
+    });
+    it('should work with real JSON', function() {
 		QuizApp(fakeUI, fakeGetJSON(require('../data/data.json'))).run();
-		spyRender.assertCalls(1);
-	})
-],
-	() => { spyRender.refresh(); }
-).runTests();
+		spyRender.assertCalls(2);
+    });
+});
+

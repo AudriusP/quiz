@@ -4,3 +4,4 @@ const HTML = require('./html');
 const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
+Quiz(UI(HTML('app')), $.getJSON).run();

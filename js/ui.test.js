@@ -1,7 +1,6 @@
 const assert = require('assert');
 const UI = require('./ui');
 const UIBackend = require('./ui-backend');
-const {Suite, test} = require('./tests-runner');
 const SpyObject = require('./spyObject.js');
 
 const spy = new SpyObject(['remove', 'getAnswers', 'getQuestion', 'addText', 'createChoice', 'createButton']);
@@ -40,15 +39,15 @@ function fakeRenderer() {
 	}
 }
 
-Suite('UI(renderer()).render(values)', [
-	test('should pass all values to renderer', () => {
-		UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, 'message');
+describe('UI(renderer()).render(values)', function() {
+    it('should pass all values to renderer', function() {
+      	UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, {error: 1});
 		spy.remove.assertCalls(1);
 
 		spy.getQuestion.assertCalls(1);
 		spy.addText.assertArgument('fakeQuestion');
 
-		spy.getAnswers.assertCalls(1);
+		spy.getAnswers.assertCalls(2);
 		spy.createChoice.assertArgument('answer1');
 		spy.createChoice.assertArgument('answer2');
 
@@ -56,5 +55,7 @@ Suite('UI(renderer()).render(values)', [
 		spy.createButton.assertArgument('Next question');
 		spy.createButton.assertCalls(2);
 
-		spy.addText.assertArgument('message');
-	})]).runTests();
+		spy.addText.assertArgument('Choose answer!');
+    });
+});
+

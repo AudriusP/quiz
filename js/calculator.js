@@ -13,3 +13,4 @@ function getCorrectAnswersCount(questions = [], userAnswers = []) {
 module.exports = {
 	getCorrectAnswersCount
 };
+

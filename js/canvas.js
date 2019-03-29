@@ -1,9 +1,9 @@
 function Canvas(enterElementId) {
 	let canvas;
 	let canvasRows = 0;
+	const enterElement = getEl(enterElementId);
 
 	function addContainer(elements) {
-		const enterElement = getEl(enterElementId);
 		enterElement.appendChild(canvas);
 	}
 
@@ -14,8 +14,8 @@ function Canvas(enterElementId) {
 		ctx.fillText(text, 10, 20 * canvasRows);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		createChoiceContainer(text, userAnswer === index, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		createChoiceContainer(text, isChecked, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -44,9 +44,11 @@ function Canvas(enterElementId) {
 	}
 
 	function clear() {
-		document.getElementById(enterElementId).innerHTML = '';
+		if(canvas != undefined) {
+			enterElement.removeChild(canvas);
+		}
 		canvasRows = 0;
-		canvas = create('canvas', {id: 'container', height: 500, style: 'display:block'}, []);
+		canvas = create('canvas', {id: 'container', height: 250, style: 'display:block'}, []);
 	}
 
 	function createChoiceContainer(text, isChecked, onChangeCallback) {

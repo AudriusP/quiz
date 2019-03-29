@@ -7,8 +7,8 @@ function UIBackend(renderer) {
 		return renderer.addText(text);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		return renderer.createChoice(text, index, userAnswer, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		return renderer.createChoice(text, isChecked, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {

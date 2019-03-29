@@ -1,9 +1,13 @@
 function HTML(enterElementId) {
+	let containers = [];
+	const enterElement = getEl(enterElementId);
+	const date = new Date();
+	const uniqueId = date.getTime();
 
 	function addContainer(elements) {
-		const enterElement = getEl(enterElementId);
 		const element = create('div', {}, []);
 		enterElement.appendChild(element);
+		containers.push(element);
 
 		for (let i = 0; i < elements.length; i++) {
 			element.appendChild(elements[i]);
@@ -14,8 +18,11 @@ function HTML(enterElementId) {
 		return create('p', {}, [createText(text)]);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		return createChoiceContainer(text, userAnswer === index, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		return create('p', {}, [
+		create('input', {name: 'answer' + uniqueId, type: 'radio', id: text + uniqueId, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
+		create('label', {htmlFor: text + uniqueId}, [createText(text)])
+		]);
 	}
 
 	function createButton(text, fnc) {
@@ -23,7 +30,12 @@ function HTML(enterElementId) {
 	}
 
 	function clear() {
-		document.getElementById(enterElementId).innerHTML = '';
+		if(containers.length > 0) {
+			containers.forEach(function(container) {
+				enterElement.removeChild(container);
+			})
+			containers = [];
+		}
 	}
 
 	return{
@@ -33,14 +45,6 @@ function HTML(enterElementId) {
 		createButton,
 		clear
 	}
-}
-
-
-function createChoiceContainer(text, isChecked, onChangeCallback) {
-	return create('p', {}, [
-		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
-		create('label', {htmlFor: text}, [createText(text)])
-		]);
 }
 
 function create(elementType, attributes, children) {

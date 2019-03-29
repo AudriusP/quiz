@@ -1,52 +1,64 @@
 const {getCorrectAnswersCount} = require('./calculator');
 
-function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message = '') {
+function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _status = {}) {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
-  let message = _message;
-
+  let status = _status;
+//Message in UI, model just provides status - error/else
   return {
   	getCurrentQuestion() {
   		return questions[currentQuestion];
   	},
+    //test for not existing answer
     setUserAnswer(answer) {
-      const _userAnswers = userAnswers
-      _userAnswers[currentQuestion] = answer;
+      const _userAnswers = userAnswers;
+      if(questions[currentQuestion].getAnswers().indexOf(answer) != -1) {
+        _userAnswers[currentQuestion] = answer;
+      } else {
+        _userAnswers[currentQuestion] = undefined;
+      }
 
       return Quiz(questions, currentQuestion, userAnswers);
     },
-    getUserAnswerId() {
-      return questions[currentQuestion].getAnswers().indexOf(userAnswers[currentQuestion]);
+    //getUserAnswerId - side effect
+    getUserAnswer() {
+      return userAnswers[currentQuestion];
     },
-    getMessage() {
-      return message;
+    getStatus() {
+      return status;
     },
   	advance() {
-      let _message = '';
+      let _status = {};
       let _currentQuestion = currentQuestion;
 
       if(!userAnswers[currentQuestion]) {
-        _message = 'Choose answer!';
+        _status = {
+          error: 1
+        };
       } else if (currentQuestion == questions.length - 1) {
-        _message = 'You answered ' + getCorrectAnswersCount(questions, userAnswers) + ' questions correctly!';
+        _status = {
+          correctAnswers: getCorrectAnswersCount(questions, userAnswers)
+        };
       } else {
         _currentQuestion++;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _message);
+      return Quiz(questions, _currentQuestion, userAnswers, _status);
   	},
     regress() {
-      let _message = '';
+      let _status = {};
       let _currentQuestion = currentQuestion;
 
       if(currentQuestion == 0) {
-        _message = 'This is first question!';
+        _status = {
+          error: 2
+        };
       } else {
         _currentQuestion--;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _message);
+      return Quiz(questions, _currentQuestion, userAnswers, _status);
     },
   };
 }

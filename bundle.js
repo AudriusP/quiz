@@ -14,13 +14,15 @@ function getCorrectAnswersCount(questions = [], userAnswers = []) {
 module.exports = {
 	getCorrectAnswersCount
 };
+
+
 },{}],2:[function(require,module,exports){
 function Canvas(enterElementId) {
 	let canvas;
 	let canvasRows = 0;
+	const enterElement = getEl(enterElementId);
 
 	function addContainer(elements) {
-		const enterElement = getEl(enterElementId);
 		enterElement.appendChild(canvas);
 	}
 
@@ -31,8 +33,8 @@ function Canvas(enterElementId) {
 		ctx.fillText(text, 10, 20 * canvasRows);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		createChoiceContainer(text, userAnswer === index, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		createChoiceContainer(text, isChecked, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -61,9 +63,11 @@ function Canvas(enterElementId) {
 	}
 
 	function clear() {
-		document.getElementById(enterElementId).innerHTML = '';
+		if(canvas != undefined) {
+			enterElement.removeChild(canvas);
+		}
 		canvasRows = 0;
-		canvas = create('canvas', {id: 'container', height: 500, style: 'display:block'}, []);
+		canvas = create('canvas', {id: 'container', height: 250, style: 'display:block'}, []);
 	}
 
 	function createChoiceContainer(text, isChecked, onChangeCallback) {
@@ -136,11 +140,15 @@ module.exports = Canvas;
 
 },{}],3:[function(require,module,exports){
 function HTML(enterElementId) {
+	let containers = [];
+	const enterElement = getEl(enterElementId);
+	const date = new Date();
+	const uniqueId = date.getTime();
 
 	function addContainer(elements) {
-		const enterElement = getEl(enterElementId);
 		const element = create('div', {}, []);
 		enterElement.appendChild(element);
+		containers.push(element);
 
 		for (let i = 0; i < elements.length; i++) {
 			element.appendChild(elements[i]);
@@ -151,8 +159,11 @@ function HTML(enterElementId) {
 		return create('p', {}, [createText(text)]);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		return createChoiceContainer(text, userAnswer === index, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		return create('p', {}, [
+		create('input', {name: 'answer' + uniqueId, type: 'radio', id: text + uniqueId, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
+		create('label', {htmlFor: text + uniqueId}, [createText(text)])
+		]);
 	}
 
 	function createButton(text, fnc) {
@@ -160,7 +171,12 @@ function HTML(enterElementId) {
 	}
 
 	function clear() {
-		document.getElementById(enterElementId).innerHTML = '';
+		if(containers.length > 0) {
+			containers.forEach(function(container) {
+				enterElement.removeChild(container);
+			})
+			containers = [];
+		}
 	}
 
 	return{
@@ -170,14 +186,6 @@ function HTML(enterElementId) {
 		createButton,
 		clear
 	}
-}
-
-
-function createChoiceContainer(text, isChecked, onChangeCallback) {
-	return create('p', {}, [
-		create('input', {name: 'answer', type: 'radio', id: text, checked: isChecked, onchange: () => {onChangeCallback(text)}}),
-		create('label', {htmlFor: text}, [createText(text)])
-		]);
 }
 
 function create(elementType, attributes, children) {
@@ -213,56 +221,69 @@ const HTML = require('./html');
 const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
+Quiz(UI(HTML('app')), $.getJSON).run();
 },{"./canvas":2,"./html":3,"./quiz":7,"./ui":9}],5:[function(require,module,exports){
 const {getCorrectAnswersCount} = require('./calculator');
 
-function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _message = '') {
+function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _status = {}) {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
-  let message = _message;
-
+  let status = _status;
+//Message in UI, model just provides status - error/else
   return {
   	getCurrentQuestion() {
   		return questions[currentQuestion];
   	},
+    //test for not existing answer
     setUserAnswer(answer) {
-      const _userAnswers = userAnswers
-      _userAnswers[currentQuestion] = answer;
+      const _userAnswers = userAnswers;
+      if(questions[currentQuestion].getAnswers().indexOf(answer) != -1) {
+        _userAnswers[currentQuestion] = answer;
+      } else {
+        _userAnswers[currentQuestion] = undefined;
+      }
 
       return Quiz(questions, currentQuestion, userAnswers);
     },
-    getUserAnswerId() {
-      return questions[currentQuestion].getAnswers().indexOf(userAnswers[currentQuestion]);
+    //getUserAnswerId - side effect
+    getUserAnswer() {
+      return userAnswers[currentQuestion];
     },
-    getMessage() {
-      return message;
+    getStatus() {
+      return status;
     },
   	advance() {
-      let _message = '';
+      let _status = {};
       let _currentQuestion = currentQuestion;
 
       if(!userAnswers[currentQuestion]) {
-        _message = 'Choose answer!';
+        _status = {
+          error: 1
+        };
       } else if (currentQuestion == questions.length - 1) {
-        _message = 'You answered ' + getCorrectAnswersCount(questions, userAnswers) + ' questions correctly!';
+        _status = {
+          correctAnswers: getCorrectAnswersCount(questions, userAnswers)
+        };
       } else {
         _currentQuestion++;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _message);
+      return Quiz(questions, _currentQuestion, userAnswers, _status);
   	},
     regress() {
-      let _message = '';
+      let _status = {};
       let _currentQuestion = currentQuestion;
 
       if(currentQuestion == 0) {
-        _message = 'This is first question!';
+        _status = {
+          error: 2
+        };
       } else {
         _currentQuestion--;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _message);
+      return Quiz(questions, _currentQuestion, userAnswers, _status);
     },
   };
 }
@@ -295,6 +316,9 @@ const Question = require('./question');
 const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
+  //Mocha/Jest - ?
+  //Keli quiz appsai?
+  //Nerenderint be reikalo, observer/listener pattern -> ar padeda? Kaip ispresti, kad kviesti rereneder tik tada, kai is tikro pasikeicia?
   let quiz;
 
   function run() {
@@ -310,7 +334,7 @@ function QuizApp(UI, getJSON) {
   }
 
   function rerender() {
-    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswerId(), quiz.getMessage());
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getStatus());
   }
 
   function next() {
@@ -345,8 +369,8 @@ function UIBackend(renderer) {
 		return renderer.addText(text);
 	}
 
-	function createChoice(text, index, userAnswer, onChangeCallback) {
-		return renderer.createChoice(text, index, userAnswer, onChangeCallback);
+	function createChoice(text, isChecked, onChangeCallback) {
+		return renderer.createChoice(text, isChecked, onChangeCallback);
 	}
 
 	function createButton(text, fnc) {
@@ -371,24 +395,49 @@ module.exports = UIBackend;
 },{}],9:[function(require,module,exports){
 const UIBackend = require('./ui-backend');
 
+const errors = [
+'',
+'Choose answer!',
+'This is first question!'
+];
+
 function UI(renderer) {
   const ui = UIBackend(renderer);
 
-  function render(next, back, onChangeCallback, Question, userAnswer, message = '') {
+  function render(next, back, onChangeCallback, Question, userAnswer, status = {}) {
+    const checkedId = Question.getAnswers().indexOf(userAnswer);
     ui.clear();
     ui.addContainer([
       ui.createText(Question.getQuestion()),
-      ...Question.getAnswers().map((answer, index) => ui.createChoice(answer, index, userAnswer, onChangeCallback)),
+      ...Question.getAnswers().map((text, index) => {
+        let isChecked;
+        if(index === checkedId) {
+          isChecked = true;
+        } else {
+          isChecked = false;
+        }
+        return ui.createChoice(text, isChecked, onChangeCallback);
+      }),
       ui.createButton('Previous question', back),
       ui.createButton('Next question', next),
       ]);
     ui.addContainer([
-      ui.createText(message),
-    ]);
+      ui.createText(getMessage(status)),
+      ]);
   }
-
+  
   return {
     render
+  }
+}
+
+  function getMessage(status) {
+  if(status.error) {
+    return errors[status.error];
+  } else if(status.correctAnswers != undefined) {
+    return 'You answered ' + status.correctAnswers + ' questions correctly!';
+  } else {
+    return '';
   }
 }
 
