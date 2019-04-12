@@ -2,9 +2,7 @@ const Question = require('./question');
 const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
-  //Mocha/Jest - ?
   //Mocha - run all test files via command line
-  //Keli quiz appsai?
   //Nerenderint be reikalo, observer/listener pattern -> ar padeda? Kaip ispresti, kad kviesti rereneder tik tada, kai is tikro pasikeicia?
 
   // Pass current Quiz to model? Then in model check current Quiz with what new Quiz should be returned?
@@ -28,28 +26,37 @@ function QuizApp(UI, getJSON) {
   }
 
   function rerender() {
-    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getStatus());
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getMessageCode(), quiz.getCorrectAnswersCount());
   }
 
   function next() {
     // 1 possibility - check here quiz -> model quiz returned?
-    quiz = quiz.advance();
-    rerender();
+    const _quiz = quiz.advance();
+    rerenderIfChanged(_quiz);
   }
 
   function back() {
-    quiz = quiz.regress();
-    rerender();
+    const _quiz = quiz.regress();
+    rerenderIfChanged(_quiz);
   }
 
   function onChangeCallback(id) {
-    quiz = quiz.setUserAnswer(id);
-    rerender();
+    const _quiz = quiz.setUserAnswer(id);
+    rerenderIfChanged(_quiz);
   }
 
-  return {
-    run
+  function rerenderIfChanged(newQuiz) {
+    if(newQuiz.getMessageCode() !== quiz.getMessageCode() ||
+     newQuiz.getCurrentQuestion() !== quiz.getCurrentQuestion()) {
+      quiz = newQuiz;
+      console.log('RENDERING');
+      rerender();
+    }
   }
+
+return {
+  run
+}
 }
 
 module.exports = QuizApp;

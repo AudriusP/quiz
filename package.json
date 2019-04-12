@@ -4,7 +4,7 @@
   "description": "Simple quiz with JS",
   "main": "index.js",
   "scripts": {
-    "test": "sh ./scripts/test.sh js/*.test.js",
+    "test": "mocha \"js/*.test.js\"",
     "build": "browserify ./js/index.js -o ./bundle.js",
     "watch": "watchman-make -p 'js/*.js' -r 'npm test'"
   },

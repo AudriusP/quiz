@@ -64,14 +64,14 @@ describe('Quiz', function() {
 			'b'
 			);
 	});
-	it('should not crash when getting status if there is none', function() {
-		Quiz().getStatus();
+	it('should not crash when getting message code if there is none', function() {
+		Quiz().getMessageCode();
 	});
-	it('should be able to get status', function() {
-		const quiz = Quiz([], 0, [], {});
-		assert.deepStrictEqual(
-			quiz.getStatus(),
-			{}
+	it('should be able to get message code', function() {
+		const quiz = Quiz([], 0, [], 0);
+		assert.equal(
+			quiz.getMessageCode(),
+			0
 			);
 	});
 	it('should not advance and should show error if user not answered', function() {
@@ -81,11 +81,9 @@ describe('Quiz', function() {
 			quiz.getCurrentQuestion().getQuestion(),
 			'A'
 			);
-		assert.deepStrictEqual(
-			quiz.getStatus(),
-			{
-				error: 1
-			}
+		assert.equal(
+			quiz.getMessageCode(),
+			1
 			);
 	});
 	it('should not advance and should show answers count if last question', function() {
@@ -95,11 +93,9 @@ describe('Quiz', function() {
 			quiz.getCurrentQuestion().getQuestion(),
 			'B'
 			);
-		assert.deepStrictEqual(
-			quiz.getStatus(),
-			{
-				correctAnswers: 0
-			}
+		assert.equal(
+			quiz.getMessageCode(),
+			3
 			);
 	});
 	it('can advance', function() {
@@ -117,11 +113,9 @@ describe('Quiz', function() {
 			quiz.getCurrentQuestion().getQuestion(),
 			'A'
 			);
-		assert.deepStrictEqual(
-			quiz.getStatus(),
-			{
-				error: 2
-			}
+		assert.equal(
+			quiz.getMessageCode(),
+			2
 			);
 	});
 	it('can regress', function() {

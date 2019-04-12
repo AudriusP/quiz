@@ -41,7 +41,7 @@ function fakeRenderer() {
 
 describe('UI(renderer()).render(values)', function() {
     it('should pass all values to renderer', function() {
-      	UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, {error: 1});
+      	UI(fakeRenderer('app')).render(() => {}, () => {}, () => {}, fakeQuestion, 0, 1);
 		spy.remove.assertCalls(1);
 
 		spy.getQuestion.assertCalls(1);

@@ -226,21 +226,20 @@ const HTML = require('./html');
 const Canvas = require('./canvas');
 
 Quiz(UI(HTML('app')), $.getJSON).run();
-Quiz(UI(HTML('app')), $.getJSON).run();
 },{"./canvas":2,"./html":3,"./quiz":7,"./ui":9}],5:[function(require,module,exports){
 const {getCorrectAnswersCount} = require('./calculator');
-
-function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _status = {}) {
+// Listen on Change? function -> use where returning Quiz - if changed - call callback who asked
+// Maybe _status - just in with code what to do with message
+function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _messageCode = 0) {
   let questions = _questions;
   let currentQuestion = _currentQuestion;
   let userAnswers = _userAnswers;
-  let status = _status;
-//Message in UI, model just provides status - error/else
+  let messageCode = _messageCode;
+
   return {
   	getCurrentQuestion() {
   		return questions[currentQuestion];
   	},
-    //test for not existing answer
     setUserAnswer(answer) {
       const _userAnswers = userAnswers;
       if(questions[currentQuestion].getAnswers().indexOf(answer) != -1) {
@@ -251,44 +250,40 @@ function Quiz(_questions = [], _currentQuestion = 0, _userAnswers = [], _status 
 
       return Quiz(questions, currentQuestion, userAnswers);
     },
-    //getUserAnswerId - side effect
     getUserAnswer() {
       return userAnswers[currentQuestion];
     },
-    getStatus() {
-      return status;
+    getCorrectAnswersCount() {
+      return getCorrectAnswersCount(questions, userAnswers);
+    },
+    getMessageCode() {
+      return messageCode;
     },
   	advance() {
-      let _status = {};
+      let _messageCode = 0;
       let _currentQuestion = currentQuestion;
 
       if(!userAnswers[currentQuestion]) {
-        _status = {
-          error: 1
-        };
+        _messageCode = 1;
       } else if (currentQuestion == questions.length - 1) {
-        _status = {
-          correctAnswers: getCorrectAnswersCount(questions, userAnswers)
-        };
+        _messageCode = 3;
       } else {
         _currentQuestion++;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _status);
+      return Quiz(questions, _currentQuestion, userAnswers, _messageCode);
   	},
     regress() {
-      let _status = {};
+      let _messageCode = 0;
       let _currentQuestion = currentQuestion;
 
       if(currentQuestion == 0) {
-        _status = {
-          error: 2
-        };
+        _messageCode = 2;
       } else {
         _currentQuestion--;
       }
 
-      return Quiz(questions, _currentQuestion, userAnswers, _status);
+      return Quiz(questions, _currentQuestion, userAnswers, _messageCode);
     },
   };
 }
@@ -321,9 +316,15 @@ const Question = require('./question');
 const Quiz = require('./model');
 
 function QuizApp(UI, getJSON) {
-  //Mocha/Jest - ?
-  //Keli quiz appsai?
+  //Mocha - run all test files via command line
   //Nerenderint be reikalo, observer/listener pattern -> ar padeda? Kaip ispresti, kad kviesti rereneder tik tada, kai is tikro pasikeicia?
+
+  // Pass current Quiz to model? Then in model check current Quiz with what new Quiz should be returned?
+  // Then return in status {rerender: true} if needed?
+  // rerender(quiz.getStatus().rerender)?
+  // or
+  // if(quiz.getStatus().rerender) { rerender()}
+
   let quiz;
 
   function run() {
@@ -339,27 +340,37 @@ function QuizApp(UI, getJSON) {
   }
 
   function rerender() {
-    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getStatus());
+    UI.render(next, back, onChangeCallback, quiz.getCurrentQuestion(), quiz.getUserAnswer(), quiz.getMessageCode(), quiz.getCorrectAnswersCount());
   }
 
   function next() {
-    quiz = quiz.advance();
-    rerender();
+    // 1 possibility - check here quiz -> model quiz returned?
+    const _quiz = quiz.advance();
+    rerenderIfChanged(_quiz);
   }
 
   function back() {
-    quiz = quiz.regress();
-    rerender();
+    const _quiz = quiz.regress();
+    rerenderIfChanged(_quiz);
   }
 
   function onChangeCallback(id) {
-    quiz = quiz.setUserAnswer(id);
-    rerender();
+    const _quiz = quiz.setUserAnswer(id);
+    rerenderIfChanged(_quiz);
   }
 
-  return {
-    run
+  function rerenderIfChanged(newQuiz) {
+    if(newQuiz.getMessageCode() !== quiz.getMessageCode() ||
+     newQuiz.getCurrentQuestion() !== quiz.getCurrentQuestion()) {
+      quiz = newQuiz;
+      console.log('RENDERING');
+      rerender();
+    }
   }
+
+return {
+  run
+}
 }
 
 module.exports = QuizApp;
@@ -400,16 +411,17 @@ module.exports = UIBackend;
 },{}],9:[function(require,module,exports){
 const UIBackend = require('./ui-backend');
 
-const errors = [
+const messageCodes = [
 '',
 'Choose answer!',
-'This is first question!'
+'This is first question!',
+'You answered correctly: '
 ];
 
 function UI(renderer) {
   const ui = UIBackend(renderer);
 
-  function render(next, back, onChangeCallback, Question, userAnswer, status = {}) {
+  function render(next, back, onChangeCallback, Question, userAnswer, messageCode = 0, correctAnswersCount) {
     const checkedId = Question.getAnswers().indexOf(userAnswer);
     ui.clear();
     ui.addContainer([
@@ -427,7 +439,7 @@ function UI(renderer) {
       ui.createButton('Next question', next),
       ]);
     ui.addContainer([
-      ui.createText(getMessage(status)),
+      ui.createText(getMessage(messageCode, correctAnswersCount)),
       ]);
   }
   
@@ -436,14 +448,14 @@ function UI(renderer) {
   }
 }
 
-  function getMessage(status) {
-  if(status.error) {
-    return errors[status.error];
-  } else if(status.correctAnswers != undefined) {
-    return 'You answered ' + status.correctAnswers + ' questions correctly!';
-  } else {
-    return '';
+function getMessage(messageCode, correctAnswersCount) {
+  let message = messageCodes[messageCode];
+
+  if(messageCode === 3) {
+    message += correctAnswersCount;
   }
+  
+  return message;
 }
 
 module.exports = UI;
