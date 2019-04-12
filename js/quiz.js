@@ -31,25 +31,24 @@ function QuizApp(UI, getJSON) {
 
   function next() {
     // 1 possibility - check here quiz -> model quiz returned?
-    const _quiz = quiz.advance();
-    rerenderIfChanged(_quiz);
+    const newQuiz = quiz.advance();
+    rerenderIfChanged(newQuiz);
   }
 
   function back() {
-    const _quiz = quiz.regress();
-    rerenderIfChanged(_quiz);
+    const newQuiz = quiz.regress();
+    rerenderIfChanged(newQuiz);
   }
 
   function onChangeCallback(id) {
-    const _quiz = quiz.setUserAnswer(id);
-    rerenderIfChanged(_quiz);
+    const newQuiz = quiz.setUserAnswer(id);
+    rerenderIfChanged(newQuiz);
   }
 
   function rerenderIfChanged(newQuiz) {
     if(newQuiz.getMessageCode() !== quiz.getMessageCode() ||
      newQuiz.getCurrentQuestion() !== quiz.getCurrentQuestion()) {
       quiz = newQuiz;
-      console.log('RENDERING');
       rerender();
     }
   }
